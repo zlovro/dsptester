@@ -63,13 +63,18 @@ void ST7920_DrawLineVerticalEx(u8 x, u8 y, u8 length, bool dotted);
 
 void ST7920_DrawLineBresenham(int x0, int y0, int x1, int y1);
 
-void ST7920_DrawRectangleOutlineEx(u8 x, u8 y, u8 width, u8 height, u8 thickness, bool cutCorners);
+void ST7920_DrawRectangleOutlineEx(u8 x, u8 y, u8 width, u8 height, u8 thickness, bool cutCorners, bool dotted);
 
-#define ST7920_DrawRectangleOutline(x, y, w, h, thickness) ST7920_DrawRectangleOutlineEx(x, y, w, h, thickness, false)
-#define ST7920_DrawRectangleOutline1(x, y, w, h) ST7920_DrawRectangleOutlineEx(x, y, w, h, 1, false)
+#define ST7920_DrawRectangleOutline(x, y, w, h, thickness) ST7920_DrawRectangleOutlineEx(x, y, w, h, thickness, false, false)
+#define ST7920_DrawRectangleOutline1(x, y, w, h) ST7920_DrawRectangleOutlineEx(x, y, w, h, 1, false, false)
 
-#define ST7920_DrawRectangleOutlineNoCorners(x, y, w, h, thickness) ST7920_DrawRectangleOutlineEx(x, y, w, h, thickness, true)
-#define ST7920_DrawRectangleOutlineNoCorners1(x, y, w, h) ST7920_DrawRectangleOutlineEx(x, y, w, h, 1, true)
+#define ST7920_DrawRectangleOutlineNoCorners(x, y, w, h, thickness) ST7920_DrawRectangleOutlineEx(x, y, w, h, thickness, true, false)
+#define ST7920_DrawRectangleOutlineNoCorners1(x, y, w, h) ST7920_DrawRectangleOutlineEx(x, y, w, h, 1, true, false)
+
+#define ST7920_DrawRectangleOutlineNoCornersDottedEx1(x, y, w, h, dotted) ST7920_DrawRectangleOutlineEx(x, y, w, h, 1, true, dotted)
+
+#define ST7920_DrawRectangleOutlineNoCornersDotted1(x, y, w, h) ST7920_DrawRectangleOutlineEx(x, y, w, h, 1, true, true)
+#define ST7920_DrawRectangleOutlineDotted1(x, y, w, h) ST7920_DrawRectangleOutlineEx(x, y, w, h, 1, false, true)
 
 void ST7920_DrawChar(char chr);
 
@@ -86,7 +91,7 @@ int        ST7920_GetStringWidth(char *str);
 void ST7920_InvertRegion(int x0, int y0, int x1, int y1);
 void ST7920_DrawCheckerboard(int x0, int y0, int x1, int y1);
 
-extern bool ST7920_CheckerboardDefaultState;
+extern bool ST7920_DottedDefaultState;
 
 void ST7920_Printf(char *format, ...);
 void ST7920_PrintfCenteredInRect(char *format, u8 x, u8 y, u8 width, u8 height, bool vertically, bool horizontally, ...);

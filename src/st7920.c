@@ -14,11 +14,11 @@
 u8 ST7920_FrontBuf[64 * (7 + 32)] = {0};
 u8 ST7920_BackBuf[1024]           = {0};
 
-int ST7920_WrapX = 128;
+int ST7920_WrapX   = 128;
 int ST7920_CursorX = 0, ST7920_CursorY = 0;
 
-bool ST7920_InvertColors = false;
-bool ST7920_CheckerboardDefaultState = false;
+bool ST7920_InvertColors       = false;
+bool ST7920_DottedDefaultState = false;
 
 
 void ST7920_Init()
@@ -335,54 +335,65 @@ int ST7920_GetStringWidth(char *str)
 
 void ST7920_InvertRegion(int x0, int y0, int x1, int y1)
 {
-    // simplest scenario - (8, 24, 32, 40) - all divisible by eight
-
     for (int y = y0; y < y1; y++)
     {
-        int rowidx = y << 4;
-        int x0idx  = x0 >> 3;
-        int x1idx  = x1 >> 3;
+        int x1idx = x1 >> 3;
+        int x0idx = x0 >> 3;
+        int x0rem = x0 & 7;
+        int x1rem = x1 & 7;
 
-        /*
-         invert the left side is x0 is not divisible by 8
-         for example - x0 = 30
-         30 & 7 = 6
-         leave out everything apart from the 6 rightmost bits
-         */
+        int idx = y * 16 + x0idx;
 
-        int x0mod = x0 & 7;
-        if (x0mod)
+        int remaining = x1 - x0;
+
+        if (remaining < 8)
         {
-            u8 mask = (1 << (8 - x0mod)) - 1;
-            ST7920_BackBuf[rowidx + x0idx] ^= mask;
+            // if the line is less than 1 cell long and spans one cell
+            if (x0idx == x1idx)
+            {
+                u8 mask = 0xFF >> x0rem;
+                mask ^= (1 << (8 - x1rem)) - 1;
+
+                ST7920_BackBuf[idx] ^= mask;
+            }
+            else
+            {
+                u8 mask = 0xFF >> x0rem;
+                ST7920_BackBuf[idx++] ^= mask;
+
+                mask = 0xFF << (8 - x1rem);
+                ST7920_BackBuf[idx] ^= mask;
+            }
+            continue;
         }
 
-        int wholeStart = x0mod ? x0idx + 1 : x0idx;
-        for (int x = wholeStart; x < x1idx; x++)
+        // left side remainder
+        if (x0rem)
         {
-            int addr             = rowidx + x;
-            ST7920_BackBuf[addr] = ~ST7920_BackBuf[addr];
+            u8 mask = 0xFF >> x0rem;
+            ST7920_BackBuf[idx++] ^= mask;
+            remaining -= x0rem;
         }
 
-        /*
-         invert the right side
-         for example - x1 = 67
-         67 & 7 = 3
-         leave out everything apart from the 3 leftmost bits
-         */
-
-        int x1mod = x1 & 7;
-        if (x1mod)
+        // whole lines
+        for (int i = 0; remaining >= 8; ++i, idx++, remaining -= 8)
         {
-            u8 mask = ~((1 << (7 - x0mod)) - 1);
-            ST7920_BackBuf[rowidx + x1idx] ^= mask;
+            ST7920_BackBuf[idx] ^= 0xFF;
+        }
+
+        // right side remainder
+        if (x1rem)
+        {
+            u8 mask = 0xFF << (8 - x1rem);
+
+            ST7920_BackBuf[idx] ^= mask;
         }
     }
 }
 
 void ST7920_DrawCheckerboard(int x0, int y0, int x1, int y1)
 {
-    bool flip = ST7920_CheckerboardDefaultState;
+    bool flip = ST7920_DottedDefaultState;
 
     for (int y = y0; y < y1; y++)
     {
@@ -397,8 +408,8 @@ void ST7920_DrawCheckerboard(int x0, int y0, int x1, int y1)
 
         int idx = y * 16 + x0idx;
 
-        int wholeCount = (x1 - x0) / 8;
-        if (wholeCount == 0)
+        int remaining = x1 - x0;
+        if (remaining < 8)
         {
             // if the line is less than 1 cell long and spans one cell
             if (x0idx == x1idx)
@@ -406,15 +417,15 @@ void ST7920_DrawCheckerboard(int x0, int y0, int x1, int y1)
                 u8 mask = 0xFF >> x0rem;
                 mask ^= (1 << (8 - x1rem)) - 1;
 
-                ST7920_BackBuf[idx] &= fill & mask;
+                ST7920_BackBuf[idx] |= fill & mask;
             }
             else
             {
-                u8 mask               = 0xFF >> x0rem;
-                ST7920_BackBuf[idx++] &= fill & mask;
+                u8 mask = 0xFF >> x0rem;
+                ST7920_BackBuf[idx++] |= fill & mask;
 
-                mask                = 0xFF << (8 - x1rem);
-                ST7920_BackBuf[idx] &= fill & mask;
+                mask = 0xFF << (8 - x1rem);
+                ST7920_BackBuf[idx] |= fill & mask;
             }
             continue;
         }
@@ -422,24 +433,15 @@ void ST7920_DrawCheckerboard(int x0, int y0, int x1, int y1)
         // left side remainder
         if (x0rem)
         {
-            u8 mask               = 0xFF >> x0rem;
-            ST7920_BackBuf[idx++] &= fill & mask;
-            // wholeCount--;
-        }
-        else
-        {
-            wholeCount++;
-        }
-
-        if (x1rem)
-        {
-            wholeCount--;
+            u8 mask = 0xFF >> x0rem;
+            ST7920_BackBuf[idx++] |= fill & mask;
+            remaining -= x0rem;
         }
 
         // whole lines
-        for (int i = 0; i < wholeCount; ++i, idx++)
+        for (int i = 0; remaining >= 8; ++i, idx++, remaining -= 8)
         {
-            ST7920_BackBuf[idx] &= fill;
+            ST7920_BackBuf[idx] |= fill;
         }
 
         // right side remainder
@@ -447,7 +449,7 @@ void ST7920_DrawCheckerboard(int x0, int y0, int x1, int y1)
         {
             u8 mask = 0xFF << (8 - x1rem);
 
-            ST7920_BackBuf[idx] &= fill & mask;
+            ST7920_BackBuf[idx] |= fill & mask;
         }
     }
 }
@@ -494,6 +496,14 @@ void ST7920_DrawLineHorizontalEx(u8 x, u8 y, u8 length, bool dotted)
     if (modLen)
     {
         ST7920_BackBuf[yIdx + rowIdx] |= ((1 << modLen) - 1) << (8 - modLen);
+    }
+
+    if (dotted)
+    {
+        for (int i = 0, _x = x + !ST7920_DottedDefaultState; i < length && _x < ST7920_WIDTH; i += 2, _x += 2)
+        {
+            ST7290_SetPixel(_x, y, false);
+        }
     }
 }
 
@@ -547,14 +557,14 @@ void ST7920_DrawLineVerticalEx(u8 x, u8 y, u8 length, bool dotted)
     }
     else
     {
-        for (int i = 0; i < newLen; y++, i++)
+        for (int i = 0, _x = x + ST7920_DottedDefaultState; i < newLen; y++, i++, _x++)
         {
-            ST7920_BackBuf[(y * 16 + xIdx)] |= (0x80 >> shift) * (i & 1);
+            ST7920_BackBuf[(y * 16 + xIdx)] |= (0x80 >> shift) * (_x & 1);
         }
     }
 }
 
-void ST7920_DrawRectangleOutlineEx(u8 x, u8 y, u8 width, u8 height, u8 thickness, bool cutCorners)
+void ST7920_DrawRectangleOutlineEx(u8 x, u8 y, u8 width, u8 height, u8 thickness, bool cutCorners, bool dotted)
 {
     int hLen = width - cutCorners * 2;
     int vLen = height - 2 * thickness;
@@ -562,13 +572,27 @@ void ST7920_DrawRectangleOutlineEx(u8 x, u8 y, u8 width, u8 height, u8 thickness
     int hStart = x + cutCorners;
     int vStart = y + thickness;
 
-    for (int i = 0; i < thickness; ++i)
+    if (dotted)
     {
-        ST7920_DrawLineHorizontal(hStart, y + i, hLen);
-        ST7920_DrawLineHorizontal(hStart, y + height - i - 1, hLen);
+        for (int i = 0; i < thickness; ++i)
+        {
+            ST7920_DrawLineHorizontalDotted(hStart, y + i, hLen);
+            ST7920_DrawLineHorizontalDotted(hStart, y + height - i - 1, hLen);
 
-        ST7920_DrawLineVertical(x + i, vStart, vLen);
-        ST7920_DrawLineVertical(x + width - i - 1, vStart, vLen);
+            ST7920_DrawLineVerticalDotted(x + i, vStart, vLen);
+            ST7920_DrawLineVerticalDotted(x + width - i - 1, vStart, vLen);
+        }
+    }
+    else
+    {
+        for (int i = 0; i < thickness; ++i)
+        {
+            ST7920_DrawLineHorizontal(hStart, y + i, hLen);
+            ST7920_DrawLineHorizontal(hStart, y + height - i - 1, hLen);
+
+            ST7920_DrawLineVertical(x + i, vStart, vLen);
+            ST7920_DrawLineVertical(x + width - i - 1, vStart, vLen);
+        }
     }
 }
 

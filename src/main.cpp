@@ -113,6 +113,8 @@ int main()
     // WAV
     // WAVPlay();
 
+    long frameCounter = 0;
+
     while (run)
     {
         auto timestamp_frameStart = std::chrono::system_clock::now();
@@ -123,16 +125,10 @@ int main()
 
         // LCD code
 
-        ST7920_ClearBack();
-
-        // ST7920_DrawCheckerboard(0, 0, 126, 2);
-        // ST7920_InvertRegion(0, 0, 9, 3);
-
-        // goto l_updateLcd;
-
-        ST7920_DrawRectangleOutline(0, 0, LCD_WIDTH, LCD_HEIGHT, ST7920_ORIGIN_X);
-
         ST7920_Seek(ST7920_ORIGIN_X, ST7920_ORIGIN_Y);
+
+        ST7920_ClearBack();
+        ST7920_DrawRectangleOutline(0, 0, LCD_WIDTH, LCD_HEIGHT, ST7920_ORIGIN_X);
 
         ST7920_DrawRectangleOutline(0, 0, LCD_WIDTH, UI_MARGIN_HEADER_Y, UI_GENERIC_MARGIN);
 
@@ -143,10 +139,9 @@ int main()
         char pageInfo[8];
         sprintf(pageInfo, "%02d", time(NULL) % 60);
 
-        // ST7920_CheckerboardDefaultState = ;
-
         ST7920_DrawStringAtPosRightJustified(pageInfo, LCD_WIDTH - ST7920_ORIGIN_X - UI_GENERIC_MARGIN, UI_PRESET_TEXT_Y_POS);
 
+        ST7920_DottedDefaultState = (frameCounter / 20) % 2;
         Screen_Pedalboard_Draw();
 
         l_updateLcd:
@@ -247,9 +242,7 @@ int main()
         // rendering code.
 
         SDL_RenderClear(renderer);
-
         SDL_RenderTexture(renderer, screenTexture, NULL, NULL);
-
         SDL_RenderPresent(renderer);
 
         while (true)
@@ -263,6 +256,8 @@ int main()
 
             SDL_DelayNS(1'000 * 100);
         }
+
+        frameCounter++;
     }
 
     wavThread.join();

@@ -44,13 +44,12 @@ void Screen_Pedalboard_Draw()
         "VO",
     };
 
+    const int selectedIdx = 6;
+
     for (int row = 0, i = 0, y = startY; row < SCREEN_PEDALBOARD_ROWS; ++row, y += SCREEN_PEDALBOARD_PEDAL_HEIGHT + indivPedalSpacingY)
     {
         for (int col = 0, x = startX; col < SCREEN_PEDALBOARD_COLS; ++col, x += SCREEN_PEDALBOARD_PEDAL_WIDTH + indivPedalSpacingX)
         {
-            ST7920_DrawRectangleOutlineNoCorners1(x, y, SCREEN_PEDALBOARD_PEDAL_WIDTH, SCREEN_PEDALBOARD_PEDAL_HEIGHT);
-            // ST7920_DrawCheckerboard(x, y, x + SCREEN_PEDALBOARD_PEDAL_WIDTH, y + SCREEN_PEDALBOARD_PEDAL_HEIGHT);
-
             ST7920_DrawStringCenteredInRect(labels[i], x, y, SCREEN_PEDALBOARD_PEDAL_WIDTH, SCREEN_PEDALBOARD_PEDAL_HEIGHT, true, true);
 
             if (col < SCREEN_PEDALBOARD_COLS - 1)
@@ -83,6 +82,15 @@ void Screen_Pedalboard_Draw()
                 ST7920_DrawLineBresenham(conn_startX, k - 1, conn_startX - 2, k - 3);
                 ST7920_DrawLineBresenham(conn_startX, k - 1, conn_startX + 2, k - 3);
             }
+
+            bool selected = i == selectedIdx;
+            if (selected)
+            {
+                ST7920_InvertRegion(x, y, x + SCREEN_PEDALBOARD_PEDAL_WIDTH, y + SCREEN_PEDALBOARD_PEDAL_HEIGHT);
+            }
+
+            bool modded = true;
+            ST7920_DrawRectangleOutlineNoCornersDottedEx1(x, y, SCREEN_PEDALBOARD_PEDAL_WIDTH, SCREEN_PEDALBOARD_PEDAL_HEIGHT, modded & !selected);
 
             i++;
         }
