@@ -7,6 +7,7 @@
 #define TYPES_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef uint8_t  u8;
 typedef uint16_t u16;
@@ -29,8 +30,11 @@ typedef const char *cstr;
 #define ARRAY_END(a) (a + ARRAY_CNT(a))
 #define ARRAY_ZERO(a) memset(a, 0, ARRAY_CNT(a) * sizeof(a[0]))
 
-#define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#define clamp(a, mx, mn) ((a) > (mx) ? (mx) : ((a) < (mn) ? (mn) : (a)))
+#define lerp(a, b, t) ((a) + ((b) - (a)) * (t))
+
 #define sq(x) ((x) * (x))
 
 #define pstruct struct __attribute__((packed))
