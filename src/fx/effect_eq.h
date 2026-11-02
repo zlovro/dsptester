@@ -7,31 +7,28 @@
 #define EFFECT_EQ_H
 
 #include "types.h"
-#include "ui/effects.h"
+#include "effects.h"
 
 #define EFFECT_EQ_F0 50
 #define EFFECT_EQ_F1 6400
 #define EFFECT_EQ_BAND_COUNT 8
 
-typedef pstruct Effect_Eq_Band
+typedef pstruct EffectEqBand
 {
-    float q;
-    u16   freq;
-} Effect_Eq_Band;
+    f32 q;
+    u16 freq;
+} EffectEqBand;
 
 typedef pstruct Effect_Eq
 {
-    EFFECT_HEADER;
+    EFFECT_COMMON_DATA;
 
-    Effect_Eq_Band bands[EFFECT_EQ_BAND_COUNT];
-} Effect_Eq;
+    EffectEqBand bands[EFFECT_EQ_BAND_COUNT];
+} EffectEq;
 
-extern Effect_Eq   Effect_Eq_Instances[];
-extern EffectArray Effect_Eq_Array;
-
-typedef struct Effect_Eq_Band_Control
-{
-    UIControl base;
-} Effect_Eq_Band_Control;
+extern void EffectEqInit(EffectEq *eq);
+extern void EffectEqDraw(EffectEq *eq);
+extern void EffectEqHandleInput(EffectEq *eq, u8 inputData);
+extern void EffectEqProcessAudio(EffectEq *eq);
 
 #endif //EFFECT_EQ_H

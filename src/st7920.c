@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <time.h>
 
 u8 ST7920_FrontBuf[64 * (7 + 32)] = {0};
 u8 ST7920_BackBuf[1024]           = {0};
@@ -19,7 +20,7 @@ int ST7920_CursorX = 0, ST7920_CursorY = 0;
 
 bool ST7920_InvertColors       = false;
 bool ST7920_DottedDefaultState = false;
-
+int  ST7920_DottedOffset       = 0;
 
 void ST7920_Init()
 {
@@ -576,11 +577,50 @@ void ST7920_DrawRectangleOutlineEx(u8 x, u8 y, u8 width, u8 height, u8 thickness
     {
         for (int i = 0; i < thickness; ++i)
         {
-            ST7920_DrawLineHorizontalDotted(hStart, y + i, hLen);
-            ST7920_DrawLineHorizontalDotted(hStart, y + height - i - 1, hLen);
+            ST7920_DrawLineHorizontal(hStart, y + i, hLen);
+            ST7920_DrawLineHorizontal(hStart, y + height - i - 1, hLen);
 
-            ST7920_DrawLineVerticalDotted(x + i, vStart, vLen);
-            ST7920_DrawLineVerticalDotted(x + width - i - 1, vStart, vLen);
+            int leftSideX  = x + i;
+            int rightSideX = x + width - i - 1;
+
+            ST7920_DrawLineVertical(leftSideX, vStart, vLen);
+            ST7920_DrawLineVertical(rightSideX, vStart, vLen);
+
+            int offset = -ST7920_DottedOffset;
+            int k = offset;
+            int mod = 4;
+
+            for (int j = vStart; j != vStart + vLen; j++, k++)
+            {
+                if (k % mod == 0)
+                {
+                    ST7290_SetPixel(leftSideX, j, false);
+                }
+            }
+
+            for (int j = hStart; j != hStart + hLen; j++, k++)
+            {
+                if (k % mod == 0)
+                {
+                    ST7290_SetPixel(j, vStart + vLen, false);
+                }
+            }
+
+            for (int j = vStart + vLen - 1; j != vStart - 1; j--, k++)
+            {
+                if (k % mod == 0)
+                {
+                    ST7290_SetPixel(rightSideX, j, false);
+                }
+            }
+
+            for (int j = hStart + hLen - 1; j != hStart - 1; j--, k++)
+            {
+                if (k % mod == 0)
+                {
+                    ST7290_SetPixel(j, vStart - 1, false);
+                }
+            }
         }
     }
     else

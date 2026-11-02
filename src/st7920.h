@@ -92,6 +92,7 @@ void ST7920_InvertRegion(int x0, int y0, int x1, int y1);
 void ST7920_DrawCheckerboard(int x0, int y0, int x1, int y1);
 
 extern bool ST7920_DottedDefaultState;
+extern int ST7920_DottedOffset;
 
 void ST7920_Printf(char *format, ...);
 void ST7920_PrintfCenteredInRect(char *format, u8 x, u8 y, u8 width, u8 height, bool vertically, bool horizontally, ...);

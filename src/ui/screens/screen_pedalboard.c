@@ -34,14 +34,12 @@ void Screen_Pedalboard_Draw()
     static_assert(indivPedalSpacingY >= 3);
 
     const char *labels[SCREEN_PEDALBOARD_ROWS * SCREEN_PEDALBOARD_COLS] = {
-        "NG",
-        "--",
-        "CE",
+        "NGT",
+        "BST",
+        "CHR",
         "DS",
-        "--",
-        "--",
-        "DE",
-        "VO",
+        "DEL",
+        "VOL",
     };
 
     const int selectedIdx = 6;
@@ -89,7 +87,7 @@ void Screen_Pedalboard_Draw()
                 ST7920_InvertRegion(x, y, x + SCREEN_PEDALBOARD_PEDAL_WIDTH, y + SCREEN_PEDALBOARD_PEDAL_HEIGHT);
             }
 
-            bool modded = true;
+            bool modded = i == 2;
             ST7920_DrawRectangleOutlineNoCornersDottedEx1(x, y, SCREEN_PEDALBOARD_PEDAL_WIDTH, SCREEN_PEDALBOARD_PEDAL_HEIGHT, modded & !selected);
 
             i++;

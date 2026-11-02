@@ -13,8 +13,8 @@ add_executable(dsptester WIN32
         src/types.h
         src/ui/uicontrol.c
         src/ui/uicontrol.h
-        src/ui/effects.c
-        src/ui/effects.h
+        src/fx/effects.c
+        src/fx/effects.h
         src/fx/effect_distorsion.c
         src/fx/effect_distorsion.h
         src/fx/effect_eq.c
@@ -23,11 +23,6 @@ add_executable(dsptester WIN32
         src/wavstreamer.hpp
         src/dsp.c
         src/dsp.h
-        src/fx/effect_highpass.h
-        src/fx/effect_highpass.c
-        src/fx/effect_highpass.h
-        src/fx/effect_lowpass.c
-        src/fx/effect_lowpass.h
         src/ui/screens/screen_pedalboard.c
         src/ui/screens/screen_pedalboard.h
         src/ui/ui_common.h

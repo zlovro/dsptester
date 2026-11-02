@@ -7,20 +7,20 @@
 #define EFFECT_DISTORSION_H
 
 #include "types.h"
-#include "ui/effects.h"
+#include "effects.h"
 #include "ui/uicontrol.h"
 
 typedef pstruct Effect_Distorsion
 {
-    EFFECT_HEADER;
+    EFFECT_COMMON_DATA;
     POTS_ARRAY(2, potGain, potDistorsion);
 
     UICONTROL_ARRAY(2);
-} Effect_Distorsion;
+} EffectDistorsion;
 
-extern Effect_Distorsion Effect_Distorsion_Instances[];
-extern EffectArray Effect_Distorsion_Array;
-
-void Effect_Distorsion_ProcessAudio_Independent(f32 gain, f32 tone, f32 dist);
+extern void EffectDistorsionInit(EffectDistorsion *fx);
+extern void EffectDistorsionDraw(EffectDistorsion *fx);
+extern void EffectDistorsionHandleInput(EffectDistorsion *fx, u8 inputData);
+extern void EffectDistorsionProcessAudio(EffectDistorsion *fx);
 
 #endif //EFFECT_DISTORSION_H

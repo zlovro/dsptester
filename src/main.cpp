@@ -11,7 +11,7 @@
 extern "C"
 {
     #include "st7920.h"
-    #include "ui/effects.h"
+    #include "fx/effects.h"
     #include "ui/ui_common.h"
     #include "dsp.h"
     #include "ui/screens/screen_pedalboard.h"
@@ -108,10 +108,12 @@ int main()
     // rem. width, height = 124, 60
 
     // FX
-    Effect_RegisterEffects();
+    EffectRegisterEffects();
 
     // WAV
     // WAVPlay();
+
+    EffectCommonData* selectedFx = (EffectCommonData*)EffectRegistry[0].instances;
 
     long frameCounter = 0;
 
@@ -141,7 +143,7 @@ int main()
 
         ST7920_DrawStringAtPosRightJustified(pageInfo, LCD_WIDTH - ST7920_ORIGIN_X - UI_GENERIC_MARGIN, UI_PRESET_TEXT_Y_POS);
 
-        ST7920_DottedDefaultState = (frameCounter / 20) % 2;
+        ST7920_DottedOffset = frameCounter / 4;
         Screen_Pedalboard_Draw();
 
         l_updateLcd:
@@ -172,13 +174,13 @@ int main()
 
                     case SDLK_LEFT:
                     {
-                        // Effect_SelectPreviousControl(selectedEffect);
+                        // EffectSelectPreviousControl(selectedEffect);
                         break;
                     }
 
                     case SDLK_RIGHT:
                     {
-                        // Effect_SelectNextControl(selectedEffect);
+                        // EffectSelectNextControl(selectedEffect);
                         break;
                     }
 
@@ -236,7 +238,10 @@ int main()
 
         if (inputData)
         {
-            // selectedEffect->funcHandleInput(selectedEffect, inputData);
+            if (inputData & ROTARY_ENCODER_DIR_POS)
+            {
+
+            }
         }
 
         // rendering code.
