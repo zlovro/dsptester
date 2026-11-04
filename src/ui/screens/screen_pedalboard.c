@@ -34,12 +34,12 @@ void Screen_Pedalboard_Draw()
     static_assert(indivPedalSpacingY >= 3);
 
     const char *labels[SCREEN_PEDALBOARD_ROWS * SCREEN_PEDALBOARD_COLS] = {
-        "NGT",
-        "BST",
-        "CHR",
-        "DS",
-        "DEL",
-        "VOL",
+        "CMP",
+        "TRE",
+        "OD",
+        "FZR",
+        "FLA",
+        "RVB",
     };
 
     const int selectedIdx = 6;

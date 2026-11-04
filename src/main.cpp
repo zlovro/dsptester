@@ -5,8 +5,12 @@
 #include <filesystem>
 #include <thread>
 
+#include <matplotlibcpp.h>
+
 #include "wavstreamer.hpp"
 #include "main.hpp"
+
+namespace plt = matplotlibcpp;
 
 extern "C"
 {
@@ -15,6 +19,8 @@ extern "C"
     #include "ui/ui_common.h"
     #include "dsp.h"
     #include "ui/screens/screen_pedalboard.h"
+    #include <fx/algo/fxalgo_noise.h>
+    #include <fftw3.h>
 }
 
 #define LCD_SPI_FRAME_SIZE (64 * (7 + 32))
@@ -86,8 +92,58 @@ static void WAVPlay()
     wavThread = std::thread(WAVStreamer_Start, "audio/deformero_mute.wav");
 }
 
+static void PlotFFT(f32 *buf, int n)
+{
+    auto signal = new fftwf_complex[n];
+    auto result = new fftwf_complex[n];
+
+    for (int i = 0; i < n; ++i)
+    {
+        signal[i][0] = buf[i];
+        signal[i][1] = 0;
+    }
+
+    fftwf_plan plan = fftwf_plan_dft_1d(n, signal, result,FFTW_FORWARD,FFTW_ESTIMATE);
+
+    fftwf_execute(plan);
+
+    fftwf_destroy_plan(plan);
+
+    std::vector<f32> x;
+    std::vector<f32> y;
+
+    for (int i = 0; i < n / 2; ++i)
+    {
+        f32 a = result[i][0];
+        f32 b = result[i][1];
+
+        x.push_back(i);
+        y.push_back(sqrtf(a * a + b * b));
+    }
+
+    plt::loglog(x, y);
+    // plt::plot(y);
+
+    delete[] signal;
+    delete[] result;
+}
+
 int main()
 {
+    f32 buf[2048];
+    for (int i = 0; i < 2048; ++i)
+    {
+        buf[i] = sinf(M_PI * 2 * i / 2048.0F) + sinf(12 * M_PI * 2 * i / 2048.0F);
+    }
+
+    // Effects_Algo_WhiteNoise(buf, 2048);
+
+    PlotFFT(buf, 2048);
+
+    plt::show();
+
+    return 0;
+
     SDL_Init(SDL_INIT_VIDEO);
 
     int  scale  = 5;
@@ -113,9 +169,8 @@ int main()
     // WAV
     // WAVPlay();
 
-    EffectCommonData* selectedFx = (EffectCommonData*)EffectRegistry[0].instances;
-
-    long frameCounter = 0;
+    EffectCommonData *selectedFx   = (EffectCommonData *) EffectRegistry[0].instances;
+    long              frameCounter = 0;
 
     while (run)
     {
@@ -146,7 +201,7 @@ int main()
         ST7920_DottedOffset = frameCounter / 4;
         Screen_Pedalboard_Draw();
 
-        l_updateLcd:
+    l_updateLcd:
 
         ST7920_BackToFront();
         UpdateLCD(ST7920_FrontBuf, screenTexture);
@@ -240,7 +295,6 @@ int main()
         {
             if (inputData & ROTARY_ENCODER_DIR_POS)
             {
-
             }
         }
 

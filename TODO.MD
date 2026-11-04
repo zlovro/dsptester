@@ -1,0 +1,19 @@
+- distorsion AA filter
+- processors independent of effects (lowpass, highpass, compressor independent functions)
+- effects:
+  - compressor
+  - EQ
+  - pitch shifter
+
+- abbrev.:
+  - EQ - EQ
+  - compressor - CMP
+  - boost - BST
+  - distorsion - DS
+  - overdrive - OD
+  - noise gate - NGT
+  - tremolo - TRE
+  - phaser - FZR
+  - flanger - FLA
+  - reverb - RVB
+  - delay - DLY
