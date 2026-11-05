@@ -19,7 +19,7 @@ extern "C"
     #include "ui/ui_common.h"
     #include "dsp.h"
     #include "ui/screens/screen_pedalboard.h"
-    #include <fx/algo/fxalgo_noise.h>
+    #include <fx/algo/fxalgo_xpass.h>
     #include <fftw3.h>
 }
 
@@ -112,17 +112,34 @@ static void PlotFFT(f32 *buf, int n)
     std::vector<f32> x;
     std::vector<f32> y;
 
-    for (int i = 0; i < n / 2; ++i)
+    int i0 = (int) (20.0F / (SAMPLE_RATE / (float) n));
+
+    for (int i = i0; i < n / 2; ++i)
     {
         f32 a = result[i][0];
         f32 b = result[i][1];
 
-        x.push_back(i);
-        y.push_back(sqrtf(a * a + b * b));
+        f32 mag   = sqrtf(a * a + b * b);
+        f32 magDb = 20 * log10f(mag);
+
+        f32 freq = i * (SAMPLE_RATE / (float) n);
+        // f32 freq = i;
+
+        x.push_back(freq);
+        y.push_back(magDb);
+
+        // x.push_back(i);
+        // y.push_back(mag);
     }
 
-    plt::loglog(x, y);
-    // plt::plot(y);
+    plt::grid(true);
+
+    plt::xlabel("Hz");
+    plt::ylabel("dB");
+
+    plt::tight_layout();
+
+    plt::semilogx(x, y, "b-");
 
     delete[] signal;
     delete[] result;
@@ -130,15 +147,27 @@ static void PlotFFT(f32 *buf, int n)
 
 int main()
 {
-    f32 buf[2048];
-    for (int i = 0; i < 2048; ++i)
-    {
-        buf[i] = sinf(M_PI * 2 * i / 2048.0F) + sinf(12 * M_PI * 2 * i / 2048.0F);
-    }
+    constexpr int N      = 32768;
+    f32           buf[N] = {};
 
-    // Effects_Algo_WhiteNoise(buf, 2048);
+    buf[0] = 1;
 
-    PlotFFT(buf, 2048);
+    Effects_Algo_FIRInstance fir;
+    f32                      aaState[N + EFFECTS_ALGO_AA_TAPCOUNT - 1];
+    Effects_Algo_AAInstance_Init(&fir, aaState);
+    Effects_Algo_AA(&fir, buf, N);
+
+    Effects_Algo_HighpassInstance hi;
+    Effects_Algo_HighpassInstance_Init(&hi, 60);
+
+    Effects_Algo_Highpass(&hi, buf, N);
+
+    Effects_Algo_LowpassInstance lo;
+    Effects_Algo_LowpassInstance_Init(&lo, 1000);
+
+    Effects_Algo_Lowpass(&lo, buf, N);
+
+    PlotFFT(buf, N);
 
     plt::show();
 

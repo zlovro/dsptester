@@ -7,37 +7,104 @@
 
 #include <math.h>
 
-static f32 mLopassStates[128] = {};
-static int mLopassCounter = 0;
+#include "dsp.h"
 
-void Effects_Algo_Lowpass1(f32 *buf, int n, f32 cutoff)
+void Effects_Algo_LowpassInstance_Init(Effects_Algo_LowpassInstance *instance, f32 cutoff)
 {
-    const float DT = 1.0f / SAMPLE_RATE;
+    float omegaC = 2.0f * (float) M_PI * cutoff / SAMPLE_RATE;
+    float k      = 1.0f - cosf(omegaC);
 
-    float rc    = 1.0f / (2.0f * M_PI * cutoff);
-    float alpha = DT / (rc + DT);
+    instance->alpha     = sqrtf(k * k + 2.0f * k) - k;
+    instance->prevState = 0.0f;
+}
 
-    mLopassCounter++;
-    float prev_output = *state;
+void Effects_Algo_Lowpass(Effects_Algo_LowpassInstance *instance, f32 *buf, int n)
+{
+    f32 alpha = instance->alpha;
+    f32 prev  = instance->prevState;
 
-    for (int i = 0; i < num_samples; i++)
+    for (size_t i = 0; i < n; i++)
     {
-        float current_sample = audio_data[i];
+        float x = buf[i];
+        float y = prev + alpha * (x - prev);
 
-        // Difference equation: y[n] = y[n-1] + alpha * (x[n] - y[n-1])
-        float output = prev_output + alpha * (current_sample - prev_output);
+        buf[i] = y;
 
-        audio_data[i] = output;
-        prev_output   = output;
+        prev = y;
     }
 
-    // 3. Save state back for continuous streaming buffers
-    *state = prev_output;
+    instance->prevState = prev;
 }
 
-static f32 mHipassStates[128] = {};
-static int mHipassCounter = 0;
-
-void Effects_Algo_Highpass1(f32 *buf, int n, f32 cutoff)
+void Effects_Algo_HighpassInstance_Init(Effects_Algo_HighpassInstance *instance, f32 cutoff)
 {
+    // used for precision.
+
+    float omegaC = 2.0f * (float) M_PI * cutoff / SAMPLE_RATE;
+    float cosW   = cosf(omegaC);
+
+    float num   = cosW - sqrtf((cosW - 1.0f) * (cosW - 3.0f));
+    float denom = 4.0f * cosW - 3.0f;
+
+    instance->alpha = num / denom;
+
+    instance->prevStateX = 0.0f;
+    instance->prevStateY = 0.0f;
 }
+
+void Effects_Algo_Highpass(Effects_Algo_HighpassInstance *instance, f32 *buf, int n)
+{
+    f32 alpha = instance->alpha;
+
+    f32 xPrev = instance->prevStateX;
+    f32 yPrev = instance->prevStateY;
+
+    for (size_t i = 0; i < n; i++)
+    {
+        float x = buf[i];
+
+        // FIX: Multiply the entire expression by alpha
+        float y = alpha * (yPrev + x - xPrev);
+
+        xPrev = x;
+        yPrev = y;
+
+        buf[i] = y;
+    }
+
+    instance->prevStateX = xPrev;
+    instance->prevStateY = yPrev;
+}
+
+static const f32 Effects_Algo_AACoeffs[];
+
+void Effects_Algo_AAInstance_Init(Effects_Algo_FIRInstance *instance, f32 *state)
+{
+    Effects_Algo_FIRInstance_Init(instance, Effects_Algo_AACoeffs, EFFECTS_ALGO_AA_TAPCOUNT, state);
+}
+
+void Effects_Algo_AA(Effects_Algo_FIRInstance *instance, f32 *buf, int n)
+{
+    Effects_Algo_FIR(instance, buf, n);
+}
+
+/*
+
+FIR filter designed with
+http://t-filter.appspot.com
+
+sampling frequency: 46875 Hz
+
+* 0 Hz - 10000 Hz
+  gain = 1
+  desired ripple = 0.25 dB
+  actual ripple = 0.1683073899677272 dB
+
+* 12000 Hz - 23437.5 Hz
+  gain = 0
+  desired attenuation = -60 dB
+  actual attenuation = -60.817744020128465 dB
+
+*/
+
+static const f32 Effects_Algo_AACoeffs[EFFECTS_ALGO_AA_TAPCOUNT] = {-0.000685536246014548, -0.0030037860835934625, -0.0027918015097060534, 0.0005509853590478026, 0.0029589165534247923, 0.000006180375051065511, -0.0038556190354007386, -0.001124841256227598, 0.004778252678325475, 0.002884430604117462, -0.005419158081127585, -0.005313569571910387, 0.005501074022412672, 0.008389364591568057, -0.004719056408671828, -0.012031596556134722, 0.0027282852443707363, 0.016094974596046127, 0.0008742974155066731, -0.020381146878126265, -0.006619736592658396, 0.02464790232052623, 0.015342217872753791, -0.028628786884620727, -0.028701458989072143, 0.032064952387554885, 0.051002413147167594, -0.03470931157671909, -0.09821991860193698, 0.036381231002510915, 0.31563230367863426, 0.46304683580339057, 0.31563230367863426, 0.036381231002510915, -0.09821991860193698, -0.03470931157671909, 0.051002413147167594, 0.032064952387554885, -0.028701458989072143, -0.028628786884620727, 0.015342217872753791, 0.02464790232052623, -0.006619736592658396, -0.020381146878126265, 0.0008742974155066731, 0.016094974596046127, 0.0027282852443707363, -0.012031596556134722, -0.004719056408671828, 0.008389364591568057, 0.005501074022412672, -0.005313569571910387, -0.005419158081127585, 0.002884430604117462, 0.004778252678325475, -0.001124841256227598, -0.0038556190354007386, 0.000006180375051065511, 0.0029589165534247923, 0.0005509853590478026, -0.0027918015097060534, -0.0030037860835934625, -0.000685536246014548};

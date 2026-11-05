@@ -26,10 +26,10 @@ add_executable(dsptester WIN32
         src/ui/screens/screen_pedalboard.c
         src/ui/screens/screen_pedalboard.h
         src/ui/ui_common.h
-        src/fx/algo/fxalgo_noise.c
-        src/fx/algo/fxalgo_noise.h
         src/fx/algo/fxalgo_xpass.c
         src/fx/algo/fxalgo_xpass.h
+        src/fx/algo/fxalgo_fir.c
+        src/fx/algo/fxalgo_fir.h
 )
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)

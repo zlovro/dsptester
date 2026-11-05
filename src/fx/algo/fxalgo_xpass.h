@@ -7,9 +7,30 @@
 #define FXALGO_XPASS_H
 
 #include <types.h>
-#include <dsp.h>
+#include "fxalgo_fir.h"
 
-void Effects_Algo_Lowpass1(f32* buf, int n, f32 cutoff);
-void Effects_Algo_Highpass1(f32* buf, int n, f32 cutoff);
+typedef struct Effects_Algo_LowpassInstance
+{
+    f32 alpha;
+    f32 prevState;
+} Effects_Algo_LowpassInstance;
+
+extern void Effects_Algo_LowpassInstance_Init(Effects_Algo_LowpassInstance *instance, f32 cutoff);
+extern void Effects_Algo_Lowpass(Effects_Algo_LowpassInstance *instance, f32 *buf, int n);
+
+typedef struct Effects_Algo_HighpassInstance
+{
+    f32 alpha;
+    f32 prevStateX, prevStateY;
+} Effects_Algo_HighpassInstance;
+
+extern void Effects_Algo_HighpassInstance_Init(Effects_Algo_HighpassInstance *instance, f32 cutoff);
+extern void Effects_Algo_Highpass(Effects_Algo_HighpassInstance *instance, f32 *buf, int n);
+
+#define EFFECTS_ALGO_AA_TAPCOUNT 63
+
+// FIR instance used. not a typo
+extern void Effects_Algo_AAInstance_Init(Effects_Algo_FIRInstance* instance, f32 *state);
+extern void Effects_Algo_AA(Effects_Algo_FIRInstance* instance, f32* buf, int n);
 
 #endif //FXALGO_XPASS_H
