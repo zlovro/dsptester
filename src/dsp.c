@@ -11,6 +11,16 @@
 
 f32 DSP_WorkBuf[DSP_CHUNK_SIZE] = {};
 
+void DSP_Init()
+{
+}
+
 void DSP_Process()
 {
+    Effect_Distorsion *ds = EFFECT_GET(Effect_Distorsion, EFFECT_ID_DISTORSION, 0);
+
+    ds->potDistorsion.value = ds->potDistorsion.degreeRange;
+    ds->potGain.value       = 100;
+
+    Effect_Distorsion_ProcessAudio(ds);
 }

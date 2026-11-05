@@ -89,7 +89,7 @@ static void WAVPlay()
     {
         wavThread.join();
     }
-    wavThread = std::thread(WAVStreamer_Start, "audio/deformero_mute.wav");
+    wavThread = std::thread(WAVStreamer_Start, "audio/sandman.wav");
 }
 
 static void PlotFFT(f32 *buf, int n)
@@ -147,31 +147,31 @@ static void PlotFFT(f32 *buf, int n)
 
 int main()
 {
-    constexpr int N      = 32768;
-    f32           buf[N] = {};
-
-    buf[0] = 1;
-
-    Effects_Algo_FIRInstance fir;
-    f32                      aaState[N + EFFECTS_ALGO_AA_TAPCOUNT - 1];
-    Effects_Algo_AAInstance_Init(&fir, aaState);
-    Effects_Algo_AA(&fir, buf, N);
-
-    Effects_Algo_HighpassInstance hi;
-    Effects_Algo_HighpassInstance_Init(&hi, 60);
-
-    Effects_Algo_Highpass(&hi, buf, N);
-
-    Effects_Algo_LowpassInstance lo;
-    Effects_Algo_LowpassInstance_Init(&lo, 1000);
-
-    Effects_Algo_Lowpass(&lo, buf, N);
-
-    PlotFFT(buf, N);
-
-    plt::show();
-
-    return 0;
+    // constexpr int N      = 32768;
+    // f32           buf[N] = {};
+    //
+    // buf[0] = 1;
+    //
+    // Effects_Algo_FIRInstance fir;
+    // f32                      aaState[N + EFFECTS_ALGO_AA_TAPCOUNT - 1];
+    // Effects_Algo_AAInstance_Init(&fir, aaState);
+    // Effects_Algo_AA(&fir, buf, N);
+    //
+    // Effects_Algo_HighpassInstance hi;
+    // Effects_Algo_HighpassInstance_Init(&hi, 60);
+    //
+    // Effects_Algo_Highpass(&hi, buf, N);
+    //
+    // Effects_Algo_LowpassInstance lo;
+    // Effects_Algo_LowpassInstance_Init(&lo, 1000);
+    //
+    // Effects_Algo_Lowpass(&lo, buf, N);
+    //
+    // PlotFFT(buf, N);
+    //
+    // plt::show();
+    //
+    // return 0;
 
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -193,12 +193,14 @@ int main()
     // rem. width, height = 124, 60
 
     // FX
-    EffectRegisterEffects();
+    Effect_RegisterEffects();
+
+    DSP_Init();
 
     // WAV
-    // WAVPlay();
+    WAVPlay();
 
-    EffectCommonData *selectedFx   = (EffectCommonData *) EffectRegistry[0].instances;
+    EffectCommonData *selectedFx   = (EffectCommonData *) Effect_Registry[0].instances;
     long              frameCounter = 0;
 
     while (run)

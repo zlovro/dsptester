@@ -43,10 +43,10 @@ void WAVStreamer_Start(const std::filesystem::path &path)
     const uint16_t numChannels = 1;
     outFile.write((const char*)&numChannels, 2);    // Channels (1 = Mono)
 
-    const uint32_t sampleRate = 192000;
+    const uint32_t sampleRate = SAMPLE_RATE;
     outFile.write((const char*)&sampleRate, 4);     // Sample Rate (192kHz)
 
-    const uint32_t byteRate = 192000 * 1 * (16 / 8);
+    const uint32_t byteRate = SAMPLE_RATE * 1 * (16 / 8);
     outFile.write((const char*)&byteRate, 4);       // Byte Rate (384000 bytes/sec)
 
     const uint16_t blockAlign = 1 * (16 / 8);

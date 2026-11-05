@@ -70,7 +70,8 @@ typedef struct EffectBlueprint
 
 #define EFFECT_POT_COUNT(fx) (sizeof(fx->pots) / sizeof(Potentiometer))
 
-void EffectRegisterEffects();
+void Effect_RegisterEffects();
+#define EFFECT_GET(t, id, idx) (((t*)((Effect_Registry + id)->instances)) + idx)
 
 void EffectSelectNextControl(EffectCommonData *fx);
 void EffectSelectPreviousControl(EffectCommonData *fx);
@@ -81,7 +82,7 @@ typedef struct EffectRegistryEntry
     void *          instances;
 } EffectRegistryEntry;
 
-extern EffectRegistryEntry EffectRegistry[];
+extern EffectRegistryEntry Effect_Registry[];
 extern f32                 Effect_LastSample;
 
 #define EFFECTS_MAX_COUNT 6

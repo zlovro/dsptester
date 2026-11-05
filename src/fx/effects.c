@@ -12,22 +12,22 @@
 
 f32 Effect_LastSample = 0;
 
-EffectBlueprint EffectDistorsionBlueprint = EFFECT_BLUEPRINT(EffectDistorsion, EFFECT_ID_DISTORSION, "Distorsion", EffectDistorsionInit, EffectDistorsionDraw, EffectDistorsionHandleInput, EffectDistorsionProcessAudio);
+EffectBlueprint EffectDistorsionBlueprint = EFFECT_BLUEPRINT(Effect_Distorsion, EFFECT_ID_DISTORSION, "Distorsion", Effect_Distorsion_Init, Effect_Distorsion_Draw, Effect_Distorsion_HandleInput, Effect_Distorsion_ProcessAudio);
 EffectBlueprint EffectEqBlueprint         = EFFECT_BLUEPRINT(EffectEq, EFFECT_ID_EQ, "EQ", EffectEqInit, EffectEqDraw, EffectEqHandleInput, EffectEqProcessAudio);
 
-EffectDistorsion EffectDistorsionInstances[EFFECTS_MAX_COUNT] = {};
+Effect_Distorsion Effect_Distorsion_Instances[EFFECTS_MAX_COUNT] = {};
 EffectEq         EffectEqInstances[EFFECTS_MAX_COUNT]         = {};
 
-EffectRegistryEntry EffectRegistry[] = {
-    [EFFECT_ID_DISTORSION] = (EffectRegistryEntry){&EffectDistorsionBlueprint, EffectDistorsionInstances},
+EffectRegistryEntry Effect_Registry[] = {
+    [EFFECT_ID_DISTORSION] = (EffectRegistryEntry){&EffectDistorsionBlueprint, Effect_Distorsion_Instances},
     [EFFECT_ID_EQ] = (EffectRegistryEntry){&EffectEqBlueprint, EffectEqInstances},
 };
 
-void EffectRegisterEffects()
+void Effect_RegisterEffects()
 {
     for (int i = 0; i < EFFECT_COUNT; ++i)
     {
-        EffectRegistryEntry registryEntry = EffectRegistry[i];
+        EffectRegistryEntry registryEntry = Effect_Registry[i];
 
         EffectBlueprint *blueprint = registryEntry.blueprint;
 
