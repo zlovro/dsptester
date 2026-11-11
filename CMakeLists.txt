@@ -3,8 +3,8 @@ project(dsptester)
 
 set(CMAKE_CXX_STANDARD 26)
 
-# This assumes the SDL source is available in vendored/SDL
-add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
+# This assumes the SDL source is available in external/SDL
+add_subdirectory(external/SDL EXCLUDE_FROM_ALL)
 
 # Create your game executable target as usual
 add_executable(dsptester WIN32
@@ -38,7 +38,7 @@ target_link_directories(dsptester PRIVATE .)
 target_link_libraries(dsptester PRIVATE SDL3::SDL3 winmm fftw3f-3 Python3::Python)
 
 target_include_directories(dsptester PRIVATE
-        vendored
+        external
         .
         ASIOSDK
         ASIOSDK/common
