@@ -78,7 +78,8 @@ void WAVStreamer_Start(const std::filesystem::path &path)
 
         for (int j = 0; j < ARRAY_CNT(DSP_WorkBuf); ++j)
         {
-            tmpBuf[j] = (s16)(DSP_WorkBuf[j] * 32767.0F);
+            float y = clamp(DSP_WorkBuf[j], -1.0F, 1.0F);
+            tmpBuf[j] = (s16)(y * 32767.0F);
         }
 
         outFile.write((char *) tmpBuf, sizeof(tmpBuf));

@@ -32,7 +32,7 @@ typedef const char *cstr;
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
-#define clamp(a, mx, mn) ((a) > (mx) ? (mx) : ((a) < (mn) ? (mn) : (a)))
+#define clamp(a, mn, mx) ((a) > (mx) ? (mx) : ((a) < (mn) ? (mn) : (a)))
 #define lerp(a, b, t) ((a) + ((b) - (a)) * (t))
 
 #define sq(x) ((x) * (x))

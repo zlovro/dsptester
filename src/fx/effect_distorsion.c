@@ -20,7 +20,16 @@ void Effect_Distorsion_Init(Effect_Distorsion *fx)
     fx->common.controlCount = ARRAY_CNT(fx->controlPtrs);
     fx->common.controls     = fx->controlPtrs;
 
-    Effects_Algo_AAInstance_Init(&fx->aaFir, fx->aaState);
+    for (int i = 0; i < EFFECT_DISTORSION_AA_COUNT; ++i)
+    {
+        f32 *state = fx->aaStates[i];
+        Effects_Algo_AAInstance_Init(fx->aaFirs + i, state);
+    }
+
+    for (int i = 0; i < EFFECT_DISTORSION_HIPASS_COUNT; ++i)
+    {
+        Effects_Algo_HighpassInstance_Init(fx->hipass + i, 100.0F);
+    }
 }
 
 void Effect_Distorsion_Draw(Effect_Distorsion *fx)
@@ -33,37 +42,25 @@ void Effect_Distorsion_HandleInput(Effect_Distorsion *fx, u8 inputData)
 
 void Effect_Distorsion_ProcessAudio(Effect_Distorsion *fx)
 {
-    Effects_Algo_AA(&fx->aaFir, DSP_WorkBuf, DSP_CHUNK_SIZE);
+    Effects_Algo_AA(fx->aaFirs + 0, DSP_WorkBuf, DSP_CHUNK_SIZE);
 
     f32         gain     = fx->potGain.value / (f32) fx->potGain.degreeRange;
-    const float MAX_GAIN = 40;
+    const float MAX_GAIN = 1000;
+
+    const float k = 10;
 
     for (int i = 0; i < DSP_CHUNK_SIZE; ++i)
     {
-        f32 y = DSP_WorkBuf[i];
+        f32 y = DSP_WorkBuf[i] * gain * MAX_GAIN;
+        y     = clamp(y, -1.0F, 1.0F);
 
-        float clipIn     = y * gain * MAX_GAIN;
-        float absClipIn  = fabs(clipIn);
-        float signClipIn = (clipIn >= 0.0f) ? 1.0f : -1.0f;
+        f32 a = expf(k * y);
+        f32 b = 1 / a;
 
-        const float THR     = 1 / 3.0F;
-        float       clipOut = 0.0f;
+        f32 h = (a - b) / (a + b);
 
-        if (absClipIn < THR)
-        {
-            clipOut = 2.0f * clipIn;
-        }
-        else if (absClipIn >= THR && absClipIn < (2.0f * THR))
-        {
-            clipOut = signClipIn * (3.0f - (2.0f - 3.0f * absClipIn) * (2.0f - 3.0f * absClipIn)) / 3.0f;
-        }
-        else
-        {
-            clipOut = signClipIn;
-        }
-
-        DSP_WorkBuf[i] = clipOut / 10.0F;
+        DSP_WorkBuf[i] = 0 ? y : h;
     }
 
-    // Effects_Algo_AA(&fx->aaFir, DSP_WorkBuf, DSP_CHUNK_SIZE);
+    Effects_Algo_AA(fx->aaFirs + 1, DSP_WorkBuf, DSP_CHUNK_SIZE);
 }

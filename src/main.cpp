@@ -89,7 +89,7 @@ static void WAVPlay()
     {
         wavThread.join();
     }
-    wavThread = std::thread(WAVStreamer_Start, "audio/sandman.wav");
+    wavThread = std::thread(WAVStreamer_Start, "audio/pm-ph.wav");
 }
 
 static void PlotFFT(f32 *buf, int n)
@@ -199,6 +199,8 @@ int main()
 
     // WAV
     WAVPlay();
+
+    // run = false;
 
     EffectCommonData *selectedFx   = (EffectCommonData *) Effect_Registry[0].instances;
     long              frameCounter = 0;
