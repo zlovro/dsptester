@@ -34,11 +34,14 @@ add_executable(dsptester WIN32
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
-target_link_directories(dsptester PRIVATE .)
+target_link_directories(dsptester PRIVATE run)
 target_link_libraries(dsptester PRIVATE SDL3::SDL3 winmm fftw3f-3 Python3::Python)
+
+set(NUMPY_DIR "${Python3_SITEARCH}/numpy/_core/include")
 
 target_include_directories(dsptester PRIVATE
         external
+        external/SDL/include
         .
         ASIOSDK
         ASIOSDK/common
@@ -46,5 +49,7 @@ target_include_directories(dsptester PRIVATE
         ASIOSDK/host/pc
         src
         ${PYTHON_INCLUDE_DIRS}
-        "C:/Users/Made/AppData/Local/Programs/Python/Python312/Lib/site-packages/numpy/_core/include/"
+        ${NUMPY_DIR}
 )
+
+set_target_properties(dsptester PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/run )

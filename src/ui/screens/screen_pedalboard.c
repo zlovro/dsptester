@@ -11,25 +11,25 @@
 
 void Screen_Pedalboard_Draw()
 {
-    const int availableSpaceX = ST7920_WIDTH - 2 * UI_MARGIN_XY - 2 * SCREEN_PEDALBOARD_MARGIN;
-    const int avaiableSpaceY  = ST7920_HEIGHT - UI_MARGIN_HEADER_Y - UI_MARGIN_XY - SCREEN_PEDALBOARD_MARGIN * 2;
+    constexpr int availableSpaceX = ST7920_WIDTH - 2 * UI_MARGIN_XY - 2 * SCREEN_PEDALBOARD_MARGIN;
+    constexpr int avaiableSpaceY  = ST7920_HEIGHT - UI_MARGIN_HEADER_Y - UI_MARGIN_XY - SCREEN_PEDALBOARD_MARGIN * 2;
 
-    const int startX = UI_MARGIN_XY + SCREEN_PEDALBOARD_MARGIN;
-    const int startY = UI_MARGIN_HEADER_Y + SCREEN_PEDALBOARD_MARGIN;
+    constexpr int startX = UI_MARGIN_XY + SCREEN_PEDALBOARD_MARGIN;
+    constexpr int startY = UI_MARGIN_HEADER_Y + SCREEN_PEDALBOARD_MARGIN;
 
     // ST7920_DrawRectangleOutline(startX, startY, availableSpaceX, avaiableSpaceY, 1);
 
-    const int totalPedalEmptySpaceX = availableSpaceX - SCREEN_PEDALBOARD_COLS * SCREEN_PEDALBOARD_PEDAL_WIDTH;
+    constexpr int totalPedalEmptySpaceX = availableSpaceX - SCREEN_PEDALBOARD_COLS * SCREEN_PEDALBOARD_PEDAL_WIDTH;
     static_assert(totalPedalEmptySpaceX > 0);
 
-    const int indivPedalSpacingX = totalPedalEmptySpaceX / (SCREEN_PEDALBOARD_COLS - 1);
+    constexpr int indivPedalSpacingX = totalPedalEmptySpaceX / (SCREEN_PEDALBOARD_COLS - 1);
     // static_assert(totalPedalEmptySpaceX % (SCREEN_PEDALBOARD_COLS - 1) == 0);
     static_assert(indivPedalSpacingX >= 2);
 
-    const int totalPedalEmptySpaceY = avaiableSpaceY - SCREEN_PEDALBOARD_ROWS * SCREEN_PEDALBOARD_PEDAL_HEIGHT;
+    constexpr int totalPedalEmptySpaceY = avaiableSpaceY - SCREEN_PEDALBOARD_ROWS * SCREEN_PEDALBOARD_PEDAL_HEIGHT;
     static_assert(totalPedalEmptySpaceY > 0);
 
-    const int indivPedalSpacingY = totalPedalEmptySpaceY / (SCREEN_PEDALBOARD_ROWS - 1);
+    constexpr int indivPedalSpacingY = totalPedalEmptySpaceY / (SCREEN_PEDALBOARD_ROWS - 1);
     static_assert(totalPedalEmptySpaceY % (SCREEN_PEDALBOARD_ROWS - 1) == 0);
     static_assert(indivPedalSpacingY >= 3);
 
@@ -42,7 +42,7 @@ void Screen_Pedalboard_Draw()
         "RVB",
     };
 
-    const int selectedIdx = 6;
+    constexpr int selectedIdx = 6;
 
     for (int row = 0, i = 0, y = startY; row < SCREEN_PEDALBOARD_ROWS; ++row, y += SCREEN_PEDALBOARD_PEDAL_HEIGHT + indivPedalSpacingY)
     {
