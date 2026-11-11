@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.31)
 project(dsptester)
 
 set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS ON)
 
 # This assumes the SDL source is available in external/SDL
 add_subdirectory(external/SDL EXCLUDE_FROM_ALL)
@@ -52,4 +55,4 @@ target_include_directories(dsptester PRIVATE
         ${NUMPY_DIR}
 )
 
-set_target_properties(dsptester PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/run )
+set_target_properties(dsptester PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/run)

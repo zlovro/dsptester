@@ -18,7 +18,7 @@ void Screen_Pedalboard_Draw()
     constexpr int startY = UI_MARGIN_HEADER_Y + SCREEN_PEDALBOARD_MARGIN;
 
     // ST7920_DrawRectangleOutline(startX, startY, availableSpaceX, avaiableSpaceY, 1);
-
+;
     constexpr int totalPedalEmptySpaceX = availableSpaceX - SCREEN_PEDALBOARD_COLS * SCREEN_PEDALBOARD_PEDAL_WIDTH;
     static_assert(totalPedalEmptySpaceX > 0);
 
