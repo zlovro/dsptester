@@ -14,10 +14,10 @@ add_executable(dsptester WIN32
         src/main.cpp
         src/st7920.c
         src/types.h
-        src/ui/uicontrol.c
-        src/ui/uicontrol.h
-        src/fx/effects.c
-        src/fx/effects.h
+        src/ui/ui_control.c
+        src/ui/ui_control.h
+        src/fx/effect.c
+        src/fx/effect.h
         src/fx/effect_distorsion.c
         src/fx/effect_distorsion.h
         src/fx/effect_eq.c
@@ -26,8 +26,6 @@ add_executable(dsptester WIN32
         src/wavstreamer.hpp
         src/dsp.c
         src/dsp.h
-        src/ui/screens/screen_pedalboard.c
-        src/ui/screens/screen_pedalboard.h
         src/ui/ui_common.h
         src/fx/algo/fxalgo_xpass.c
         src/fx/algo/fxalgo_xpass.h
@@ -37,6 +35,18 @@ add_executable(dsptester WIN32
         src/fx/algo/fxalgo_eq.h
         src/pedalboard.c
         src/pedalboard.h
+        src/fx/effect_noisegate.c
+        src/fx/effect_noisegate.h
+        src/fx/effect_volume.c
+        src/fx/effect_volume.h
+        src/fx/effect_chorus.c
+        src/fx/effect_chorus.h
+        src/fx/effect_delay.c
+        src/fx/effect_delay.h
+        src/fx/algo/fxalgo_noisegate.c
+        src/fx/algo/fxalgo_noisegate.h
+        src/fx/algo/fxalgo_volume.c
+        src/fx/algo/fxalgo_volume.h
 )
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)

@@ -8,7 +8,7 @@
 #include "effect_distorsion.h"
 #include "dsp.h"
 
-void Effect_Distorsion_Init(Effect_Distorsion *fx)
+void Effect_DistorsionInit(Effect_Distorsion *fx)
 {
     Potentiometer_InitMany(fx->pots, EFFECT_POT_COUNT(fx));
 
@@ -32,15 +32,15 @@ void Effect_Distorsion_Init(Effect_Distorsion *fx)
     }
 }
 
-void Effect_Distorsion_Draw(Effect_Distorsion *fx)
+void Effect_DistorsionDraw(Effect_Distorsion *fx)
 {
 }
 
-void Effect_Distorsion_HandleInput(Effect_Distorsion *fx, u8 inputData)
+void Effect_DistorsionHandleInput(Effect_Distorsion *fx, u8 inputData)
 {
 }
 
-void Effect_Distorsion_ProcessAudio(Effect_Distorsion *fx)
+void Effect_DistorsionProcessAudio(Effect_Distorsion *fx)
 {
     Effect_Algo_AA(fx->aaFirs + 0);
 

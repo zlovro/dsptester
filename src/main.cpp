@@ -17,10 +17,7 @@ extern "C"
 
     #include "st7920.h"
     #include "fx/effect.h"
-    #include "fx/effect_eq.h"
     #include "ui/ui_common.h"
-    #include "ui/screens/screen_pedalboard.h"
-    #include <fx/algo/fxalgo_xpass.h>
     #include <fftw3.h>
 }
 
@@ -78,21 +75,13 @@ int main()
     SDL_SetTextureScaleMode(screenTexture, SDL_SCALEMODE_NEAREST);
 
     ST7920_Init();
-
-    // rem. width, height = 124, 60
-
-    // FX
-    Effect_RegisterEffects();
-
     DSP_Init();
-
-    // WAV
     WAVPlay();
 
-    // run = false;
+    Effect_RegisterEffects();
+    Pedalboard_Init();
 
-    Effect_CommonData *selectedFx   = (Effect_CommonData *) Effect_Registry[0].instances;
-    long               frameCounter = 0;
+    long frameCounter = 0;
 
     while (run)
     {
@@ -121,7 +110,7 @@ int main()
         ST7920_DrawStringAtPosRightJustified(pageInfo, LCD_WIDTH - ST7920_ORIGIN_X - UI_GENERIC_MARGIN, UI_PRESET_TEXT_Y_POS);
 
         ST7920_DottedOffset = frameCounter / 4;
-        Screen_Pedalboard_Draw();
+        Pedalboard_Draw();
 
     l_updateLcd:
 

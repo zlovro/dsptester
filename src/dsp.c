@@ -24,5 +24,5 @@ void DSP_Process()
     ds->potDistorsion.value = ds->potDistorsion.degreeRange;
     ds->potGain.value       = 100;
 
-    Effect_Distorsion_ProcessAudio(ds);
+    Effect_DistorsionProcessAudio(ds);
 }

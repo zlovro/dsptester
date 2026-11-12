@@ -9,31 +9,40 @@
 
 #include "effect_distorsion.h"
 #include "effect_eq.h"
+#include "effect_noisegate.h"
+#include "effect_volume.h"
 
 f32 Effect_LastSample = 0;
 
-EffectBlueprint EffectDistorsionBlueprint = EFFECT_BLUEPRINT(Effect_Distorsion, EFFECT_ID_DISTORSION, "Distorsion", Effect_Distorsion_Init, Effect_Distorsion_Draw, Effect_Distorsion_HandleInput, Effect_Distorsion_ProcessAudio);
-EffectBlueprint EffectEqBlueprint         = EFFECT_BLUEPRINT(Effect_Eq, EFFECT_ID_EQ, "EQ", Effect_EqInit, Effect_EqDraw, Effect_EqHandleInput, Effect_EqProcessAudio);
+#define EFFECT_REGISTER_BLUEPRINT_EX(t, id, abbrev, n) Effect_Blueprint t ## Blueprint = EFFECT_BLUEPRINT(t, id, abbrev); t t ## Instances[n] = {}
+#define EFFECT_REGISTER_BLUEPRINT(t, id, abbrev) EFFECT_REGISTER_BLUEPRINT_EX(t, id, abbrev, EFFECT_MAX_COUNT)
+#define EFFECT_REGISTER(t, id) [id] = (Effect_RegistryEntry){&##t ## Blueprint, ##t ## Instances}
 
-Effect_Distorsion Effect_Distorsion_Instances[EFFECTS_MAX_COUNT] = {};
-Effect_Eq         EffectEqInstances[EFFECTS_MAX_COUNT]           = {};
+EFFECT_REGISTER_BLUEPRINT(Effect_Distorsion, EFFECT_ID_DISTORSION, "DS");
+EFFECT_REGISTER_BLUEPRINT(Effect_Eq, EFFECT_ID_EQ, "EQ");
+EFFECT_REGISTER_BLUEPRINT(Effect_NoiseGate, EFFECT_ID_NOISEGATE, "GAT");
+EFFECT_REGISTER_BLUEPRINT(Effect_Volume, EFFECT_ID_VOLUME, "VOL");
 
-EffectRegistryEntry Effect_Registry[] = {
-    [EFFECT_ID_DISTORSION] = (EffectRegistryEntry){&EffectDistorsionBlueprint, Effect_Distorsion_Instances},
-    [EFFECT_ID_EQ] = (EffectRegistryEntry){&EffectEqBlueprint, EffectEqInstances},
+Effect_RegistryEntry Effect_Registry[] = {
+    EFFECT_REGISTER(Effect_Distorsion, EFFECT_ID_DISTORSION),
+    EFFECT_REGISTER(Effect_Eq, EFFECT_ID_EQ),
+    EFFECT_REGISTER(Effect_NoiseGate, EFFECT_ID_NOISEGATE),
+    EFFECT_REGISTER(Effect_Volume, EFFECT_ID_VOLUME),
 };
+
+bool Effect_RegistryDone = false;
 
 void Effect_RegisterEffects()
 {
     for (int i = 0; i < EFFECT_COUNT; ++i)
     {
-        EffectRegistryEntry registryEntry = Effect_Registry[i];
+        Effect_RegistryEntry registryEntry = Effect_Registry[i];
 
-        EffectBlueprint *blueprint = registryEntry.blueprint;
-        EffectId         id        = blueprint->id;
+        Effect_Blueprint *blueprint = registryEntry.blueprint;
+        EffectId          id        = blueprint->id;
 
         void *instance = registryEntry.instances;
-        for (int j = 0; j < EFFECTS_MAX_COUNT; ++j)
+        for (int j = 0; j < EFFECT_MAX_COUNT; ++j)
         {
             // effect common data must always be at offset 0x0
             Effect_CommonData *common = instance;
@@ -48,6 +57,8 @@ void Effect_RegisterEffects()
             instance += blueprint->fxSizeBytes;
         }
     }
+
+    Effect_RegistryDone = true;
 }
 
 void EffectSelectNextControl(Effect_CommonData *fx)

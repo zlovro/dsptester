@@ -8,7 +8,7 @@
 
 #include "types.h"
 #include "effect.h"
-#include "ui/uicontrol.h"
+#include "ui/ui_control.h"
 #include <fx/algo/fxalgo_xpass.h>
 
 #define EFFECT_DISTORSION_AA_COUNT 2
@@ -27,9 +27,9 @@ typedef pstruct Effect_Distorsion
     Effect_Algo_HighpassInstance hipass[EFFECT_DISTORSION_HIPASS_COUNT];
 } Effect_Distorsion;
 
-extern void Effect_Distorsion_Init(Effect_Distorsion *fx);
-extern void Effect_Distorsion_Draw(Effect_Distorsion *fx);
-extern void Effect_Distorsion_HandleInput(Effect_Distorsion *fx, u8 inputData);
-extern void Effect_Distorsion_ProcessAudio(Effect_Distorsion *fx);
+extern void Effect_DistorsionInit(Effect_Distorsion *fx);
+extern void Effect_DistorsionDraw(Effect_Distorsion *fx);
+extern void Effect_DistorsionHandleInput(Effect_Distorsion *fx, u8 inputData);
+extern void Effect_DistorsionProcessAudio(Effect_Distorsion *fx);
 
 #endif //EFFECT_DISTORSION_H

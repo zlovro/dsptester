@@ -3,7 +3,7 @@
 // Copyright (c) 2026 lovro. All rights reserved.
 //
 
-#include "uicontrol.h"
+#include "ui_control.h"
 
 #include <math.h>
 #include <stdio.h>

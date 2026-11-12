@@ -7,12 +7,17 @@
 #define EFFECTS_H
 
 #include <types.h>
-#include <ui/uicontrol.h>
+#include <ui/ui_control.h>
+#include <pedalboard.h>
+
+#define EFFECT_MAX_COUNT PEDALBOARD_PEDAL_COUNT
 
 typedef enum : u16
 {
     EFFECT_ID_DISTORSION,
     EFFECT_ID_EQ,
+    EFFECT_ID_NOISEGATE,
+    EFFECT_ID_VOLUME,
     EFFECT_COUNT,
 } EffectId;
 
@@ -28,7 +33,7 @@ typedef void (*FuncEffectHandleInput)(void *, u8);
 // (fxInstance*)
 typedef void (*FuncEffectProcessAudio)(void *);
 
-typedef struct EffectCommonData
+typedef struct Effect_CommonData
 {
     EffectId id;
 
@@ -37,9 +42,9 @@ typedef struct EffectCommonData
     u8          controlCount;
 } Effect_CommonData;
 
-typedef struct EffectBlueprint
+typedef struct Effect_Blueprint
 {
-    const char *name;
+    char abbrev[4];
 
     EffectId id;
 
@@ -54,18 +59,18 @@ typedef struct EffectBlueprint
     // xxxx B DIR
     // B = button pressed, DIR = RotaryEncoder_Direction
     FuncEffectHandleInput funcHandleInput;
-} EffectBlueprint;
+} Effect_Blueprint;
 
 #define EFFECT_COMMON_DATA Effect_CommonData common
-#define EFFECT_BLUEPRINT(_type, _id, _name, fnInit, fnDraw, fnHandleInput, fnProcessAudio) \
-    (EffectBlueprint){ \
+#define EFFECT_BLUEPRINT(_type, _id, _abbrev) \
+    (Effect_Blueprint){ \
         .fxSizeBytes = sizeof(_type), \
         .id = _id, \
-        .name = _name, \
-        .funcDraw = (FuncEffectDraw) fnDraw, \
-        .funcHandleInput =(FuncEffectHandleInput) fnHandleInput, \
-        .funcInit = (FuncEffectInit) fnInit, \
-        .funcProcessAudio = (FuncEffectProcessAudio) fnProcessAudio, \
+        .abbrev = _abbrev, \
+        .funcDraw = (FuncEffectDraw) (_type ## Draw), \
+        .funcHandleInput =(FuncEffectHandleInput) (_type ## HandleInput), \
+        .funcInit = (FuncEffectInit) (_type ## Init), \
+        .funcProcessAudio = (FuncEffectProcessAudio) (_type ## ProcessAudio), \
     }
 
 #define EFFECT_POT_COUNT(fx) (sizeof(fx->pots) / sizeof(Potentiometer))
@@ -78,13 +83,13 @@ void EffectSelectPreviousControl(Effect_CommonData *fx);
 
 typedef struct EffectRegistryEntry
 {
-    EffectBlueprint *blueprint;
+    Effect_Blueprint *blueprint;
     void *          instances;
-} EffectRegistryEntry;
+} Effect_RegistryEntry;
 
-extern EffectRegistryEntry Effect_Registry[];
+extern bool Effect_RegistryDone;
+
+extern Effect_RegistryEntry Effect_Registry[];
 extern f32                 Effect_LastSample;
-
-#define EFFECTS_MAX_COUNT 6
 
 #endif //EFFECTS_H
