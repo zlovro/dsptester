@@ -23,12 +23,12 @@ void Effect_Distorsion_Init(Effect_Distorsion *fx)
     for (int i = 0; i < EFFECT_DISTORSION_AA_COUNT; ++i)
     {
         f32 *state = fx->aaStates[i];
-        Effects_Algo_AAInstance_Init(fx->aaFirs + i, state);
+        Effect_Algo_AAInstance_Init(fx->aaFirs + i, state);
     }
 
     for (int i = 0; i < EFFECT_DISTORSION_HIPASS_COUNT; ++i)
     {
-        Effects_Algo_HighpassInstance_Init(fx->hipass + i, 100.0F);
+        Effect_Algo_HighpassInstance_Init(fx->hipass + i, 100.0F);
     }
 }
 
@@ -42,7 +42,7 @@ void Effect_Distorsion_HandleInput(Effect_Distorsion *fx, u8 inputData)
 
 void Effect_Distorsion_ProcessAudio(Effect_Distorsion *fx)
 {
-    Effects_Algo_AA(fx->aaFirs + 0, DSP_WorkBuf, DSP_CHUNK_SIZE);
+    Effect_Algo_AA(fx->aaFirs + 0);
 
     f32         gain     = fx->potGain.value / (f32) fx->potGain.degreeRange;
     const float MAX_GAIN = 1000;
@@ -62,5 +62,5 @@ void Effect_Distorsion_ProcessAudio(Effect_Distorsion *fx)
         DSP_WorkBuf[i] = 0 ? y : h;
     }
 
-    Effects_Algo_AA(fx->aaFirs + 1, DSP_WorkBuf, DSP_CHUNK_SIZE);
+    Effect_Algo_AA(fx->aaFirs + 1);
 }

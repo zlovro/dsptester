@@ -7,28 +7,22 @@
 #define EFFECT_EQ_H
 
 #include "types.h"
-#include "effects.h"
+#include "effect.h"
 
-#define EFFECT_EQ_F0 50
-#define EFFECT_EQ_F1 6400
-#define EFFECT_EQ_BAND_COUNT 8
+#include <fx/algo/fxalgo_eq.h>
 
-typedef pstruct EffectEqBand
-{
-    f32 q;
-    u16 freq;
-} EffectEqBand;
-
-typedef pstruct Effect_Eq
-{
+typedef pstruct Effect_Eq {
     EFFECT_COMMON_DATA;
 
-    EffectEqBand bands[EFFECT_EQ_BAND_COUNT];
-} EffectEq;
+    Effect_Algo_EqInstance algoInstance;
+} Effect_Eq;
 
-extern void EffectEqInit(EffectEq *eq);
-extern void EffectEqDraw(EffectEq *eq);
-extern void EffectEqHandleInput(EffectEq *eq, u8 inputData);
-extern void EffectEqProcessAudio(EffectEq *eq);
+extern void Effect_EqInit(Effect_Eq *fx);
+extern void Effect_EqDraw(Effect_Eq *fx);
+extern void Effect_EqHandleInput(Effect_Eq *fx, u8 inputData);
+extern void Effect_EqProcessAudio(Effect_Eq *fx);
+
+extern void Effect_EqBandUpdate(Effect_Eq* fx, int band, u16 freq, f32 gain, f32 q);
+extern void Effect_EqBandUpdateByFreq(Effect_Eq* fx, u16 searchFreq, f32 gain, f32 q);
 
 #endif //EFFECT_EQ_H

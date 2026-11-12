@@ -5,7 +5,9 @@
 
 #include "fxalgo_fir.h"
 
-void Effects_Algo_FIRInstance_Init(Effects_Algo_FIRInstance *instance, f32 *coeffs, int nCoeff, f32 *state)
+#include "dsp.h"
+
+void Effect_Algo_FIRInstance_Init(Effect_Algo_FIRInstance *instance, f32 *coeffs, int nCoeff, f32 *state)
 {
     instance->coeffs = coeffs;
     instance->nCoeff = nCoeff;
@@ -14,11 +16,11 @@ void Effects_Algo_FIRInstance_Init(Effects_Algo_FIRInstance *instance, f32 *coef
     instance->head = 0;
 }
 
-void Effects_Algo_FIR(Effects_Algo_FIRInstance *fir, f32 *buf, int n)
+void Effect_Algo_FIR(Effect_Algo_FIRInstance *fir)
 {
-    for (size_t s = 0; s < n; s++)
+    for (size_t s = 0; s < DSP_CHUNK_SIZE; s++)
     {
-        float input = buf[s];
+        float input = DSP_WorkBuf[s];
 
         fir->state[fir->head] = input;
 
@@ -40,6 +42,6 @@ void Effects_Algo_FIR(Effects_Algo_FIRInstance *fir, f32 *buf, int n)
 
         fir->head = (fir->head + 1) % fir->nCoeff;
 
-        buf[s] = output;
+        DSP_WorkBuf[s] = output;
     }
 }

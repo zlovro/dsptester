@@ -19,7 +19,7 @@ void DSP_Process()
 {
     Effect_Distorsion *ds = EFFECT_GET(Effect_Distorsion, EFFECT_ID_DISTORSION, 0);
 
-    // Effects_Algo_AA(&fir, DSP_WorkBuf, DSP_CHUNK_SIZE);
+    // Effect_Algo_AA(&fir, DSP_WorkBuf, DSP_CHUNK_SIZE);
 
     ds->potDistorsion.value = ds->potDistorsion.degreeRange;
     ds->potGain.value       = 100;

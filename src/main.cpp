@@ -1,7 +1,6 @@
 #include <chrono>
 #include <cmath>
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_video.h>
 #include <filesystem>
 #include <thread>
 
@@ -14,10 +13,12 @@ namespace plt = matplotlibcpp;
 
 extern "C"
 {
-    #include "st7920.h"
-    #include "fx/effects.h"
-    #include "ui/ui_common.h"
     #include "dsp.h"
+
+    #include "st7920.h"
+    #include "fx/effect.h"
+    #include "fx/effect_eq.h"
+    #include "ui/ui_common.h"
     #include "ui/screens/screen_pedalboard.h"
     #include <fx/algo/fxalgo_xpass.h>
     #include <fftw3.h>
@@ -33,145 +34,33 @@ constexpr u32 LCD_COLOR_FRONT = 0xE4EBA0FF;
 
 const bool DSP_WavTest = true;
 
-void UpdateLCD(uint8_t *spiFrame, SDL_Texture *texture)
-{
-    u32 *texBuf;
-    int  pitch;
-    SDL_LockTexture(texture, NULL, (void **) &texBuf, &pitch);
-
-    int filled = 0;
-
-    uint8_t *p = spiFrame;
-    while (true)
-    {
-        if (filled >= LCD_HEIGHT * LCD_WIDTH)
-        {
-            break;
-        }
-
-        if (*p == 0xF8)
-        {
-            p++;
-            u16 y = ((*p++) & 0x70);
-            y |= (*p++ & 0x70) >> 4;
-
-            p++;
-
-            u16 x = ((*p++) & 0x70);
-            x |= (*p++ & 0x70) >> 4;
-        }
-
-        if (*p == 0xFA)
-        {
-            p++;
-
-            for (int i = 0; i < 16; i++)
-            {
-                auto x = *p++ | (*p++ >> 4);
-                for (int j = 7; j >= 0; j--)
-                {
-                    *texBuf++ = x & 1 << j ? LCD_COLOR_FRONT : LCD_COLOR_BACK;
-                }
-            }
-
-            filled += 128;
-        }
-    }
-
-    SDL_UnlockTexture(texture);
-}
-
 static std::thread wavThread;
 
-static void WAVPlay()
-{
-    if (wavThread.joinable())
-    {
-        wavThread.join();
-    }
-    wavThread = std::thread(WAVStreamer_Start, "audio/pm-ph.wav");
-}
-
-static void PlotFFT(f32 *buf, int n)
-{
-    auto signal = new fftwf_complex[n];
-    auto result = new fftwf_complex[n];
-
-    for (int i = 0; i < n; ++i)
-    {
-        signal[i][0] = buf[i];
-        signal[i][1] = 0;
-    }
-
-    fftwf_plan plan = fftwf_plan_dft_1d(n, signal, result,FFTW_FORWARD,FFTW_ESTIMATE);
-
-    fftwf_execute(plan);
-
-    fftwf_destroy_plan(plan);
-
-    std::vector<f32> x;
-    std::vector<f32> y;
-
-    int i0 = (int) (20.0F / (SAMPLE_RATE / (float) n));
-
-    for (int i = i0; i < n / 2; ++i)
-    {
-        f32 a = result[i][0];
-        f32 b = result[i][1];
-
-        f32 mag   = sqrtf(a * a + b * b);
-        f32 magDb = 20 * log10f(mag);
-
-        f32 freq = i * (SAMPLE_RATE / (float) n);
-        // f32 freq = i;
-
-        x.push_back(freq);
-        y.push_back(magDb);
-
-        // x.push_back(i);
-        // y.push_back(mag);
-    }
-
-    plt::grid(true);
-
-    plt::xlabel("Hz");
-    plt::ylabel("dB");
-
-    plt::tight_layout();
-
-    plt::semilogx(x, y, "b-");
-
-    delete[] signal;
-    delete[] result;
-}
+void        UpdateLCD(uint8_t *spiFrame, SDL_Texture *texture);
+static void WAVPlay();
+static void PlotFFT(f32 *buf, int n);
 
 int main()
 {
-    // constexpr int N      = 32768;
-    // f32           buf[N] = {};
-    //
-    // buf[0] = 1;
-    //
-    // Effects_Algo_FIRInstance fir;
-    // f32                      aaState[N + EFFECTS_ALGO_AA_TAPCOUNT - 1];
-    // Effects_Algo_AAInstance_Init(&fir, aaState);
-    // Effects_Algo_AA(&fir, buf, N);
-    //
-    // Effects_Algo_HighpassInstance hi;
-    // Effects_Algo_HighpassInstance_Init(&hi, 60);
-    //
-    // Effects_Algo_Highpass(&hi, buf, N);
-    //
-    // Effects_Algo_LowpassInstance lo;
-    // Effects_Algo_LowpassInstance_Init(&lo, 1000);
-    //
-    // Effects_Algo_Lowpass(&lo, buf, N);
-    //
-    // PlotFFT(buf, N);
-    //
-    // plt::show();
-    //
-    // return 0;
+    #if TEST_TRANSFER_FUNC
+
+    DSP_WorkBuf[0] = 1;
+
+    Effect_RegisterEffects();
+
+    Effect_Eq *eq = (Effect_Eq *) Effect_Registry[EFFECT_ID_EQ].instances;
+    Effect_EqBandUpdateByFreq(eq, 50, 0.1, 10);
+    Effect_EqBandUpdateByFreq(eq, 400, 2, 10);
+    Effect_EqBandUpdateByFreq(eq, 1600, 10, 10);
+
+    Effect_EqProcessAudio(eq);
+
+    PlotFFT(DSP_WorkBuf, DSP_CHUNK_SIZE);
+
+    plt::show();
+
+    return 0;
+    #else
 
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -202,8 +91,8 @@ int main()
 
     // run = false;
 
-    EffectCommonData *selectedFx   = (EffectCommonData *) Effect_Registry[0].instances;
-    long              frameCounter = 0;
+    Effect_CommonData *selectedFx   = (Effect_CommonData *) Effect_Registry[0].instances;
+    long               frameCounter = 0;
 
     while (run)
     {
@@ -361,4 +250,117 @@ int main()
     SDL_Quit();
 
     return 0;
+    #endif
+}
+
+
+void UpdateLCD(uint8_t *spiFrame, SDL_Texture *texture)
+{
+    u32 *texBuf;
+    int  pitch;
+    SDL_LockTexture(texture, NULL, (void **) &texBuf, &pitch);
+
+    int filled = 0;
+
+    uint8_t *p = spiFrame;
+    while (true)
+    {
+        if (filled >= LCD_HEIGHT * LCD_WIDTH)
+        {
+            break;
+        }
+
+        if (*p == 0xF8)
+        {
+            p++;
+            u16 y = ((*p++) & 0x70);
+            y |= (*p++ & 0x70) >> 4;
+
+            p++;
+
+            u16 x = ((*p++) & 0x70);
+            x |= (*p++ & 0x70) >> 4;
+        }
+
+        if (*p == 0xFA)
+        {
+            p++;
+
+            for (int i = 0; i < 16; i++)
+            {
+                auto x = *p++ | (*p++ >> 4);
+                for (int j = 7; j >= 0; j--)
+                {
+                    *texBuf++ = x & 1 << j ? LCD_COLOR_FRONT : LCD_COLOR_BACK;
+                }
+            }
+
+            filled += 128;
+        }
+    }
+
+    SDL_UnlockTexture(texture);
+}
+
+static void WAVPlay()
+{
+    if (wavThread.joinable())
+    {
+        wavThread.join();
+    }
+    wavThread = std::thread(WAVStreamer_Start, "audio/pm-ph.wav");
+}
+
+
+static void PlotFFT(f32 *buf, int n)
+{
+    fftwf_complex *signal = fftwf_alloc_complex(n);
+    fftwf_complex *result = fftwf_alloc_complex(n);
+
+    // init before fill.
+    fftwf_plan plan = fftwf_plan_dft_1d(n, signal, result,FFTW_FORWARD,FFTW_ESTIMATE);
+
+    for (int i = 0; i < n; ++i)
+    {
+        signal[i][0] = buf[i];
+        signal[i][1] = 0;
+    }
+
+    fftwf_execute(plan);
+
+    std::vector<f32> x;
+    std::vector<f32> y;
+
+    int i0 = (int) (20.0F / (SAMPLE_RATE / (float) n));
+
+    for (int i = i0; i < n / 2; ++i)
+    {
+        f32 a = result[i][0];
+        f32 b = result[i][1];
+
+        f32 mag   = sqrtf(a * a + b * b);
+        f32 magDb = 20 * log10f(mag);
+
+        f32 freq = i * (SAMPLE_RATE / (float) n);
+        // f32 freq = i;
+
+        x.push_back(freq);
+        y.push_back(magDb);
+
+        // x.push_back(i);
+        // y.push_back(mag);
+    }
+
+    plt::grid(true);
+
+    plt::xlabel("Hz");
+    plt::ylabel("dB");
+
+    plt::tight_layout();
+
+    plt::semilogx(x, y, "b-");
+
+    fftwf_destroy_plan(plan);
+    fftwf_free(signal);
+    fftwf_free(result);
 }

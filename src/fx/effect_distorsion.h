@@ -7,7 +7,7 @@
 #define EFFECT_DISTORSION_H
 
 #include "types.h"
-#include "effects.h"
+#include "effect.h"
 #include "ui/uicontrol.h"
 #include <fx/algo/fxalgo_xpass.h>
 
@@ -21,10 +21,10 @@ typedef pstruct Effect_Distorsion
 
     UICONTROL_ARRAY(2);
 
-    f32 aaStates[EFFECT_DISTORSION_AA_COUNT][EFFECTS_ALGO_AA_TAPCOUNT];
-    Effects_Algo_FIRInstance aaFirs[EFFECT_DISTORSION_AA_COUNT];
+    f32 aaStates[EFFECT_DISTORSION_AA_COUNT][EFFECT_ALGO_AA_TAPCOUNT];
+    Effect_Algo_FIRInstance aaFirs[EFFECT_DISTORSION_AA_COUNT];
 
-    Effects_Algo_HighpassInstance hipass[EFFECT_DISTORSION_HIPASS_COUNT];
+    Effect_Algo_HighpassInstance hipass[EFFECT_DISTORSION_HIPASS_COUNT];
 } Effect_Distorsion;
 
 extern void Effect_Distorsion_Init(Effect_Distorsion *fx);

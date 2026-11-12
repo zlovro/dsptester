@@ -8,7 +8,7 @@
 
 #include <st7920.h>
 #include <assert.h>
-#include <fx/effects.h>
+#include <fx/effect.h>
 
 #define SCREEN_PEDALBOARD_ROWS 2
 #define SCREEN_PEDALBOARD_COLS 3

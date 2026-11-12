@@ -9,7 +9,7 @@
 
 #include "dsp.h"
 
-void Effects_Algo_LowpassInstance_Init(Effects_Algo_LowpassInstance *instance, f32 cutoff)
+void Effect_Algo_LowpassInstance_Init(Effect_Algo_LowpassInstance *instance, f32 cutoff)
 {
     float omegaC = 2.0f * (float) M_PI * cutoff / SAMPLE_RATE;
     float k      = 1.0f - cosf(omegaC);
@@ -18,17 +18,17 @@ void Effects_Algo_LowpassInstance_Init(Effects_Algo_LowpassInstance *instance, f
     instance->prevState = 0.0f;
 }
 
-void Effects_Algo_Lowpass(Effects_Algo_LowpassInstance *instance, f32 *buf, int n)
+void Effect_Algo_Lowpass(Effect_Algo_LowpassInstance *instance)
 {
     f32 alpha = instance->alpha;
     f32 prev  = instance->prevState;
 
-    for (size_t i = 0; i < n; i++)
+    for (size_t i = 0; i < DSP_CHUNK_SIZE; i++)
     {
-        float x = buf[i];
+        float x = DSP_WorkBuf[i];
         float y = prev + alpha * (x - prev);
 
-        buf[i] = y;
+        DSP_WorkBuf[i] = y;
 
         prev = y;
     }
@@ -36,7 +36,7 @@ void Effects_Algo_Lowpass(Effects_Algo_LowpassInstance *instance, f32 *buf, int 
     instance->prevState = prev;
 }
 
-void Effects_Algo_HighpassInstance_Init(Effects_Algo_HighpassInstance *instance, f32 cutoff)
+void Effect_Algo_HighpassInstance_Init(Effect_Algo_HighpassInstance *instance, f32 cutoff)
 {
     // used for precision.
 
@@ -52,40 +52,39 @@ void Effects_Algo_HighpassInstance_Init(Effects_Algo_HighpassInstance *instance,
     instance->prevStateY = 0.0f;
 }
 
-void Effects_Algo_Highpass(Effects_Algo_HighpassInstance *instance, f32 *buf, int n)
+void Effect_Algo_Highpass(Effect_Algo_HighpassInstance *instance)
 {
     f32 alpha = instance->alpha;
 
     f32 xPrev = instance->prevStateX;
     f32 yPrev = instance->prevStateY;
 
-    for (size_t i = 0; i < n; i++)
+    for (size_t i = 0; i < DSP_CHUNK_SIZE; i++)
     {
-        float x = buf[i];
+        float x = DSP_WorkBuf[i];
 
-        // FIX: Multiply the entire expression by alpha
         float y = alpha * (yPrev + x - xPrev);
 
         xPrev = x;
         yPrev = y;
 
-        buf[i] = y;
+        DSP_WorkBuf[i] = y;
     }
 
     instance->prevStateX = xPrev;
     instance->prevStateY = yPrev;
 }
 
-static const f32 Effects_Algo_AACoeffs[];
+static const f32 Effect_Algo_AACoeffs[];
 
-void Effects_Algo_AAInstance_Init(Effects_Algo_FIRInstance *instance, f32 *state)
+void Effect_Algo_AAInstance_Init(Effect_Algo_FIRInstance *instance, f32 *state)
 {
-    Effects_Algo_FIRInstance_Init(instance, Effects_Algo_AACoeffs, EFFECTS_ALGO_AA_TAPCOUNT, state);
+    Effect_Algo_FIRInstance_Init(instance, Effect_Algo_AACoeffs, EFFECT_ALGO_AA_TAPCOUNT, state);
 }
 
-void Effects_Algo_AA(Effects_Algo_FIRInstance *instance, f32 *buf, int n)
+void Effect_Algo_AA(Effect_Algo_FIRInstance *instance)
 {
-    Effects_Algo_FIR(instance, buf, n);
+    Effect_Algo_FIR(instance);
 }
 
 /*
@@ -107,4 +106,4 @@ sampling frequency: 46875 Hz
 
 */
 
-static const f32 Effects_Algo_AACoeffs[EFFECTS_ALGO_AA_TAPCOUNT] = {-0.000685536246014548, -0.0030037860835934625, -0.0027918015097060534, 0.0005509853590478026, 0.0029589165534247923, 0.000006180375051065511, -0.0038556190354007386, -0.001124841256227598, 0.004778252678325475, 0.002884430604117462, -0.005419158081127585, -0.005313569571910387, 0.005501074022412672, 0.008389364591568057, -0.004719056408671828, -0.012031596556134722, 0.0027282852443707363, 0.016094974596046127, 0.0008742974155066731, -0.020381146878126265, -0.006619736592658396, 0.02464790232052623, 0.015342217872753791, -0.028628786884620727, -0.028701458989072143, 0.032064952387554885, 0.051002413147167594, -0.03470931157671909, -0.09821991860193698, 0.036381231002510915, 0.31563230367863426, 0.46304683580339057, 0.31563230367863426, 0.036381231002510915, -0.09821991860193698, -0.03470931157671909, 0.051002413147167594, 0.032064952387554885, -0.028701458989072143, -0.028628786884620727, 0.015342217872753791, 0.02464790232052623, -0.006619736592658396, -0.020381146878126265, 0.0008742974155066731, 0.016094974596046127, 0.0027282852443707363, -0.012031596556134722, -0.004719056408671828, 0.008389364591568057, 0.005501074022412672, -0.005313569571910387, -0.005419158081127585, 0.002884430604117462, 0.004778252678325475, -0.001124841256227598, -0.0038556190354007386, 0.000006180375051065511, 0.0029589165534247923, 0.0005509853590478026, -0.0027918015097060534, -0.0030037860835934625, -0.000685536246014548};
+static const f32 Effect_Algo_AACoeffs[EFFECT_ALGO_AA_TAPCOUNT] = {-0.000685536246014548, -0.0030037860835934625, -0.0027918015097060534, 0.0005509853590478026, 0.0029589165534247923, 0.000006180375051065511, -0.0038556190354007386, -0.001124841256227598, 0.004778252678325475, 0.002884430604117462, -0.005419158081127585, -0.005313569571910387, 0.005501074022412672, 0.008389364591568057, -0.004719056408671828, -0.012031596556134722, 0.0027282852443707363, 0.016094974596046127, 0.0008742974155066731, -0.020381146878126265, -0.006619736592658396, 0.02464790232052623, 0.015342217872753791, -0.028628786884620727, -0.028701458989072143, 0.032064952387554885, 0.051002413147167594, -0.03470931157671909, -0.09821991860193698, 0.036381231002510915, 0.31563230367863426, 0.46304683580339057, 0.31563230367863426, 0.036381231002510915, -0.09821991860193698, -0.03470931157671909, 0.051002413147167594, 0.032064952387554885, -0.028701458989072143, -0.028628786884620727, 0.015342217872753791, 0.02464790232052623, -0.006619736592658396, -0.020381146878126265, 0.0008742974155066731, 0.016094974596046127, 0.0027282852443707363, -0.012031596556134722, -0.004719056408671828, 0.008389364591568057, 0.005501074022412672, -0.005313569571910387, -0.005419158081127585, 0.002884430604117462, 0.004778252678325475, -0.001124841256227598, -0.0038556190354007386, 0.000006180375051065511, 0.0029589165534247923, 0.0005509853590478026, -0.0027918015097060534, -0.0030037860835934625, -0.000685536246014548};

@@ -9,7 +9,15 @@
 #include "types.h"
 
 #define SAMPLE_RATE 48000
+#define SAMPLE_TIME_F (1.0F / SAMPLE_RATE)
+
+#define TEST_TRANSFER_FUNC 1
+
+#if TEST_TRANSFER_FUNC
+#define DSP_CHUNK_SIZE 8192
+#else
 #define DSP_CHUNK_SIZE 1024
+#endif
 
 extern f32 DSP_WorkBuf[DSP_CHUNK_SIZE];
 

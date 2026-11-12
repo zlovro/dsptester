@@ -44,4 +44,9 @@ typedef const char *cstr;
 #define RAM_D3_BUFFER BDMA_BUFFER
 #define RAM_BUFFER __attribute__((section(".sram")))
 
+#define M_PI_F 3.14159265358979323846F
+#define M_TWOPI_F (2 * M_PI_F)
+#define M_SQ2_F 1.41421356237309504880F
+#define M_1SQ2_F (1.0F / M_SQ2_F)
+
 #endif //TYPES_H

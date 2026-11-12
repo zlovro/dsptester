@@ -33,6 +33,10 @@ add_executable(dsptester WIN32
         src/fx/algo/fxalgo_xpass.h
         src/fx/algo/fxalgo_fir.c
         src/fx/algo/fxalgo_fir.h
+        src/fx/algo/fxalgo_eq.c
+        src/fx/algo/fxalgo_eq.h
+        src/pedalboard.c
+        src/pedalboard.h
 )
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)

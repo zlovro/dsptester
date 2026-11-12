@@ -35,7 +35,7 @@ typedef struct EffectCommonData
     UIControl **controls;
     u8          selectedControlIdx;
     u8          controlCount;
-} EffectCommonData;
+} Effect_CommonData;
 
 typedef struct EffectBlueprint
 {
@@ -56,7 +56,7 @@ typedef struct EffectBlueprint
     FuncEffectHandleInput funcHandleInput;
 } EffectBlueprint;
 
-#define EFFECT_COMMON_DATA EffectCommonData common
+#define EFFECT_COMMON_DATA Effect_CommonData common
 #define EFFECT_BLUEPRINT(_type, _id, _name, fnInit, fnDraw, fnHandleInput, fnProcessAudio) \
     (EffectBlueprint){ \
         .fxSizeBytes = sizeof(_type), \
@@ -73,8 +73,8 @@ typedef struct EffectBlueprint
 void Effect_RegisterEffects();
 #define EFFECT_GET(t, id, idx) (((t*)((Effect_Registry + id)->instances)) + idx)
 
-void EffectSelectNextControl(EffectCommonData *fx);
-void EffectSelectPreviousControl(EffectCommonData *fx);
+void EffectSelectNextControl(Effect_CommonData *fx);
+void EffectSelectPreviousControl(Effect_CommonData *fx);
 
 typedef struct EffectRegistryEntry
 {

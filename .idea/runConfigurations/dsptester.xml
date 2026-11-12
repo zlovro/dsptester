@@ -1,5 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="dsptester" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" WORKING_DIR="file://$ProjectFileDir$/run" PASS_PARENT_ENVS_2="true" PROJECT_NAME="dsptester" TARGET_NAME="dsptester" CONFIG_NAME="Debug" RUN_PATH="$PROJECT_DIR$/run/dsptester.exe">
+    <envs>
+      <env name="PYTHONHOME" value="C:\Users\Made\AppData\Local\Programs\Python\Python312" />
+    </envs>
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
     </method>

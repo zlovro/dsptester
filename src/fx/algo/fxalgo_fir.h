@@ -14,9 +14,9 @@ typedef struct
     int  nCoeff;
     f32 *state;
     int  head;
-} Effects_Algo_FIRInstance;
+} Effect_Algo_FIRInstance;
 
-extern void Effects_Algo_FIRInstance_Init(Effects_Algo_FIRInstance *instance, f32 *coeffs, int nCoeff, f32 *state);
-extern void Effects_Algo_FIR(Effects_Algo_FIRInstance *instance, f32 *buf, int n);
+extern void Effect_Algo_FIRInstance_Init(Effect_Algo_FIRInstance *instance, f32 *coeffs, int nCoeff, f32 *state);
+extern void Effect_Algo_FIR(Effect_Algo_FIRInstance *instance);
 
 #endif //FXALGO_FIR_H
