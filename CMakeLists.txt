@@ -47,6 +47,8 @@ add_executable(dsptester WIN32
         src/fx/algo/fxalgo_noisegate.h
         src/fx/algo/fxalgo_volume.c
         src/fx/algo/fxalgo_volume.h
+        src/input.c
+        src/input.h
 )
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)

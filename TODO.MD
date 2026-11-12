@@ -1,8 +1,8 @@
 - distorsion AA filter
-- processors independent of effects (lowpass, highpass, compressor independent functions)
+- ~~processors independent of effects (lowpass, highpass, compressor independent functions)~~
 - effects:
   - compressor
-  - EQ
+  - ~~EQ~~
   - pitch shifter
 
 - abbrev.:
@@ -17,3 +17,16 @@
   - flanger - FLA
   - reverb - RVB
   - delay - DLY
+
+- UI:
+  - DS UI
+  - EQ UI
+  - Noisegate UI
+  - any fx UI
+  - Fix InvertRegion
+  - Pedal selection and modification
+
+- Pedalboard:
+  - preset saving/loading
+  - presets in general
+  - add ON/OFF rectangle to every pedal

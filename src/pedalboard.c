@@ -7,8 +7,11 @@
 
 #include <assert.h>
 
+#include "input.h"
 #include "st7920.h"
+#include "fx/effect_distorsion.h"
 #include "fx/effect_noisegate.h"
+#include "fx/effect_volume.h"
 #include "ui/ui_common.h"
 
 Effect_CommonData *Pedalboard_Pedals[PEDALBOARD_PEDAL_COUNT] = {};
@@ -19,13 +22,14 @@ void Pedalboard_Init()
 {
     if (!Effect_RegistryDone)
     {
-        assert("Pedalboard must be initialized after all effects are registered");
+        // Pedalboard must be initialized after all effects are registered
+        assert(false);
     }
 
-    Pedalboard_Pedals = {
-        EFFECT_GET(Effect_NoiseGate, EFFECT_ID_NOISEGATE, 0),
-        EFFECT_GET()
-    };
+    Pedalboard_InsertNew(0, EFFECT_ID_NOISEGATE);
+    Pedalboard_InsertNew(1, EFFECT_ID_DISTORSION);
+    Pedalboard_InsertNew(2, EFFECT_ID_EQ);
+    Pedalboard_InsertNew(5, EFFECT_ID_VOLUME);
 }
 
 void Pedalboard_Draw()
@@ -113,12 +117,63 @@ void Pedalboard_Draw()
                 ST7920_InvertRegion(x, y, x + PEDALBOARD_PEDAL_WIDTH, y + PEDALBOARD_PEDAL_HEIGHT);
             }
 
-            bool modded = i == 2;
+            bool modded = false;
             ST7920_DrawRectangleOutlineNoCornersDottedEx1(x, y, PEDALBOARD_PEDAL_WIDTH, PEDALBOARD_PEDAL_HEIGHT, modded & !selected);
 
             i++;
         }
     }
+}
+
+void Pedalboard_InsertExisting(int pos, Effect_CommonData *pedal)
+{
+    Pedalboard_Pedals[pos] = pedal;
+}
+
+void Pedalboard_InsertNew(int pos, EffectId pedalId)
+{
+    u32 matrix = 0;
+
+    Effect_RegistryEntry *entry = Effect_Registry + pedalId;
+
+    Effect_Blueprint *blueprint   = entry->blueprint;
+    void *            instances   = entry->instances;
+    u32               fxSizeBytes = blueprint->fxSizeBytes;
+
+    for (int i = 0; i < PEDALBOARD_PEDAL_COUNT; ++i)
+    {
+        Effect_CommonData *pedal = Pedalboard_Pedals[i];
+        if (!pedal)
+        {
+            continue;
+        }
+
+        EffectId id = pedal->id;
+
+        if (pedalId == id)
+        {
+            int distance         = (void *) pedal - instances;
+            int idxIntoInstances = distance / fxSizeBytes;
+
+            matrix |= 1 << idxIntoInstances;
+        }
+    }
+
+    // gets the index of the rightmost set bit + 1 (LSB = 1)
+    u32 firstFreeIdx = __builtin_ffs(~matrix) - 1;
+
+    if (firstFreeIdx >= PEDALBOARD_PEDAL_COUNT)
+    {
+        assert(false);
+    }
+
+    Effect_CommonData* pedal = instances + firstFreeIdx * fxSizeBytes;
+    Pedalboard_InsertExisting(pos, pedal);
+}
+
+void Pedalboard_ClearSlot(int pos)
+{
+    Pedalboard_Pedals[pos] = NULL;
 }
 
 void Pedalboard_SelectNextPedal()
@@ -136,5 +191,17 @@ void Pedalboard_SelectPrevPedal()
     if (Pedalboard_SelectedPedalIndex < 0)
     {
         Pedalboard_SelectedPedalIndex = PEDALBOARD_PEDAL_COUNT - 1;
+    }
+}
+
+void Pedalboard_HandleInput()
+{
+    if (InputData_Instance.rotaryDir == INPUT_DIR_L)
+    {
+        Pedalboard_SelectPrevPedal();
+    }
+    else if (InputData_Instance.rotaryDir == INPUT_DIR_R)
+    {
+        Pedalboard_SelectNextPedal();
     }
 }

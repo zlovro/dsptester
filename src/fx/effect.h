@@ -8,18 +8,17 @@
 
 #include <types.h>
 #include <ui/ui_control.h>
-#include <pedalboard.h>
 
-#define EFFECT_MAX_COUNT PEDALBOARD_PEDAL_COUNT
-
-typedef enum : u16
+enum EffectId : u16
 {
     EFFECT_ID_DISTORSION,
     EFFECT_ID_EQ,
     EFFECT_ID_NOISEGATE,
     EFFECT_ID_VOLUME,
     EFFECT_COUNT,
-} EffectId;
+};
+
+typedef enum EffectId EffectId;
 
 // (fxInstance*)
 typedef void (*FuncEffectInit)(void *);
@@ -75,8 +74,10 @@ typedef struct Effect_Blueprint
 
 #define EFFECT_POT_COUNT(fx) (sizeof(fx->pots) / sizeof(Potentiometer))
 
+#define EFFECT_GET(t, id, idx) (((struct t*)((Effect_Registry + id)->instances)) + idx)
+#define EFFECT_GET0(t, id) EFFECT_GET(t, id, 0)
+
 void Effect_RegisterEffects();
-#define EFFECT_GET(t, id, idx) (((t*)((Effect_Registry + id)->instances)) + idx)
 
 void EffectSelectNextControl(Effect_CommonData *fx);
 void EffectSelectPreviousControl(Effect_CommonData *fx);

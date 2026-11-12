@@ -11,12 +11,13 @@
 #include "effect_eq.h"
 #include "effect_noisegate.h"
 #include "effect_volume.h"
+#include "pedalboard.h"
 
 f32 Effect_LastSample = 0;
 
 #define EFFECT_REGISTER_BLUEPRINT_EX(t, id, abbrev, n) Effect_Blueprint t ## Blueprint = EFFECT_BLUEPRINT(t, id, abbrev); t t ## Instances[n] = {}
-#define EFFECT_REGISTER_BLUEPRINT(t, id, abbrev) EFFECT_REGISTER_BLUEPRINT_EX(t, id, abbrev, EFFECT_MAX_COUNT)
-#define EFFECT_REGISTER(t, id) [id] = (Effect_RegistryEntry){&##t ## Blueprint, ##t ## Instances}
+#define EFFECT_REGISTER_BLUEPRINT(t, id, abbrev) EFFECT_REGISTER_BLUEPRINT_EX(t, id, abbrev, PEDALBOARD_PEDAL_COUNT)
+#define EFFECT_REGISTER(t, id) [id] = (Effect_RegistryEntry){&t ## Blueprint, t ## Instances}
 
 EFFECT_REGISTER_BLUEPRINT(Effect_Distorsion, EFFECT_ID_DISTORSION, "DS");
 EFFECT_REGISTER_BLUEPRINT(Effect_Eq, EFFECT_ID_EQ, "EQ");
@@ -42,7 +43,7 @@ void Effect_RegisterEffects()
         EffectId          id        = blueprint->id;
 
         void *instance = registryEntry.instances;
-        for (int j = 0; j < EFFECT_MAX_COUNT; ++j)
+        for (int j = 0; j < PEDALBOARD_PEDAL_COUNT; ++j)
         {
             // effect common data must always be at offset 0x0
             Effect_CommonData *common = instance;

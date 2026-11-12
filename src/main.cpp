@@ -9,15 +9,17 @@
 #include "wavstreamer.hpp"
 #include "main.hpp"
 
+
 namespace plt = matplotlibcpp;
 
 extern "C"
 {
-    #include "dsp.h"
+    #include <dsp.h>
+    #include <ui/ui_common.h>
+    #include <st7920.h>
+    #include <pedalboard.h>
+    #include <input.h>
 
-    #include "st7920.h"
-    #include "fx/effect.h"
-    #include "ui/ui_common.h"
     #include <fftw3.h>
 }
 
@@ -87,8 +89,6 @@ int main()
     {
         auto timestamp_frameStart = std::chrono::system_clock::now();
 
-        u8 inputData = 0;
-
         SDL_PollEvent(&ev);
 
         // LCD code
@@ -118,6 +118,7 @@ int main()
         UpdateLCD(ST7920_FrontBuf, screenTexture);
 
         // input code
+        InputData_Instance.rotaryDir = INPUT_DIR_NULL;
 
         switch (ev.type)
         {
@@ -130,70 +131,16 @@ int main()
 
             case SDL_EVENT_KEY_DOWN:
             {
-                switch (ev.key.key)
+                SDL_Keycode key = ev.key.key;
+
+                if (key == SDLK_LEFT)
                 {
-                    case SDLK_ESCAPE:
-                    {
-                        run = false;
-                        break;
-                    }
-
-                    case SDLK_LEFT:
-                    {
-                        // EffectSelectPreviousControl(selectedEffect);
-                        break;
-                    }
-
-                    case SDLK_RIGHT:
-                    {
-                        // EffectSelectNextControl(selectedEffect);
-                        break;
-                    }
-
-                    case SDLK_UP:
-                    {
-                        // int nextId = selectedEffect->id + 1;
-                        // if (nextId >= EFFECT_COUNT)
-                        // {
-                        //     nextId = 0;
-                        // }
-
-                        break;
-                    }
-
-                    case SDLK_DOWN:
-                    {
-                        // int nextId = selectedEffect->id - 1;
-                        // if (nextId < 0)
-                        // {
-                        //     nextId = EFFECT_COUNT - 1;
-                        // }
-
-                        break;
-                    }
-
-                    case SDLK_SPACE:
-                    {
-                        inputData |= ROTARY_ENCODER_BTN_PRESSED;
-                        break;
-                    }
+                    InputData_Instance.rotaryDir = INPUT_DIR_L;
                 }
-
-                break;
-            }
-
-            case SDL_EVENT_MOUSE_WHEEL:
-            {
-                if (ev.wheel.integer_y > 0)
+                else if (key == SDLK_RIGHT)
                 {
-                    inputData |= ROTARY_ENCODER_DIR_POS;
+                    InputData_Instance.rotaryDir = INPUT_DIR_R;
                 }
-                else
-                {
-                    inputData |= ROTARY_ENCODER_DIR_NEG;
-                }
-
-                break;
             }
 
             default:
@@ -202,15 +149,9 @@ int main()
             }
         }
 
-        if (inputData)
-        {
-            if (inputData & ROTARY_ENCODER_DIR_POS)
-            {
-            }
-        }
+        Pedalboard_HandleInput();
 
         // rendering code.
-
         SDL_RenderClear(renderer);
         SDL_RenderTexture(renderer, screenTexture, NULL, NULL);
         SDL_RenderPresent(renderer);

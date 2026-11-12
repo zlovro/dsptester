@@ -14,13 +14,4 @@
 
 #define UI_PRESET_TEXT_Y_POS (ST7920_ORIGIN_Y + 1)
 
-typedef enum : u8
-{
-    ROTARY_ENCODER_DIR_NULL,
-    ROTARY_ENCODER_DIR_POS,
-    ROTARY_ENCODER_DIR_NEG,
-} RotaryEncoder_Direction;
-
-#define ROTARY_ENCODER_BTN_PRESSED (1 << 2)
-
 #endif //UI_COMMON_H

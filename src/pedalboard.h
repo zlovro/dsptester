@@ -29,7 +29,13 @@ extern int Pedalboard_SelectedPedalIndex;
 extern void Pedalboard_Init();
 extern void Pedalboard_Draw();
 
+extern void Pedalboard_InsertExisting(int pos, Effect_CommonData *pedal);
+extern void Pedalboard_InsertNew(int pos, EffectId pedalId);
+extern void Pedalboard_ClearSlot(int pos);
+
 extern void Pedalboard_SelectNextPedal();
 extern void Pedalboard_SelectPrevPedal();
+
+extern void Pedalboard_HandleInput();
 
 #endif //PEDALBOARD_H

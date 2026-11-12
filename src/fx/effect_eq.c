@@ -46,5 +46,5 @@ void Effect_EqBandUpdateByFreq(Effect_Eq *fx, u16 searchFreq, f32 gain, f32 q)
         }
     }
 
-    assert("Unknown eq freq");
+    assert(false);
 }
