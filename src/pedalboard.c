@@ -6,17 +6,23 @@
 #include "pedalboard.h"
 
 #include <assert.h>
+#include <malloc.h>
+#include <stdio.h>
 
 #include "input.h"
+#include "iohelper.h"
 #include "st7920.h"
 #include "fx/effect_distorsion.h"
 #include "fx/effect_noisegate.h"
-#include "fx/effect_volume.h"
 #include "ui/ui_common.h"
 
-Effect_CommonData *Pedalboard_Pedals[PEDALBOARD_PEDAL_COUNT] = {};
+Pedalboard_Preset  Pedalboard_Presets[PEDALBOARD_PRESET_COUNT] = {};
+Effect_CommonData *Pedalboard_Pedals[PEDALBOARD_PEDAL_COUNT]   = {};
 
-int Pedalboard_SelectedPedalIndex = 0;
+Pedalboard_Preset *Pedalboard_ActivePreset = Pedalboard_Presets + 4;
+
+void *Pedalboard_DynamicIOBuf       = NULL;
+int   Pedalboard_SelectedPedalIndex = 2;
 
 void Pedalboard_Init()
 {
@@ -30,6 +36,15 @@ void Pedalboard_Init()
     Pedalboard_InsertNew(1, EFFECT_ID_DISTORSION);
     Pedalboard_InsertNew(2, EFFECT_ID_EQ);
     Pedalboard_InsertNew(5, EFFECT_ID_VOLUME);
+
+    for (int i = 0; i < PEDALBOARD_PRESET_COUNT; ++i)
+    {
+        Pedalboard_Preset preset = {};
+
+        sprintf(preset.name, "Preset %02d", i + 1);
+
+        Pedalboard_Presets[i] = preset;
+    }
 }
 
 void Pedalboard_Draw()
@@ -136,9 +151,9 @@ void Pedalboard_InsertNew(int pos, EffectId pedalId)
 
     Effect_RegistryEntry *entry = Effect_Registry + pedalId;
 
-    Effect_Blueprint *blueprint   = entry->blueprint;
+    Effect_Blueprint *bp          = entry->blueprint;
     void *            instances   = entry->instances;
-    u32               fxSizeBytes = blueprint->fxSizeBytes;
+    u32               fxSizeBytes = bp->instanceSize;
 
     for (int i = 0; i < PEDALBOARD_PEDAL_COUNT; ++i)
     {
@@ -167,13 +182,10 @@ void Pedalboard_InsertNew(int pos, EffectId pedalId)
         assert(false);
     }
 
-    Effect_CommonData* pedal = instances + firstFreeIdx * fxSizeBytes;
-    Pedalboard_InsertExisting(pos, pedal);
-}
+    Effect_CommonData *pedal = instances + firstFreeIdx * fxSizeBytes;
+    bp->funcInit(pedal);
 
-void Pedalboard_ClearSlot(int pos)
-{
-    Pedalboard_Pedals[pos] = NULL;
+    Pedalboard_InsertExisting(pos, pedal);
 }
 
 void Pedalboard_SelectNextPedal()
@@ -196,12 +208,128 @@ void Pedalboard_SelectPrevPedal()
 
 void Pedalboard_HandleInput()
 {
-    if (InputData_Instance.rotaryDir == INPUT_DIR_L)
+    InputData in = InputData_Instance;
+
+    if (in.rotaryDir == INPUT_DIR_L)
     {
         Pedalboard_SelectPrevPedal();
     }
-    else if (InputData_Instance.rotaryDir == INPUT_DIR_R)
+    else if (in.rotaryDir == INPUT_DIR_R)
     {
         Pedalboard_SelectNextPedal();
+    }
+
+    if (in.btnNxt == INPUT_BTN_DOWN)
+    {
+        Pedalboard_SelectNextPreset();
+    }
+    else if (in.btnPrev == INPUT_BTN_DOWN)
+    {
+        Pedalboard_SelectPrevPreset();
+    }
+}
+
+void Pedalboard_StateSerialize(void **outBufPtr)
+{
+    u32 idSize    = sizeof(EffectId) * PEDALBOARD_PEDAL_COUNT;
+    u32 allocSize = idSize;
+
+    for (int i = 0; i < PEDALBOARD_PEDAL_COUNT; ++i)
+    {
+        Effect_CommonData *pedal = Pedalboard_Pedals[i];
+        if (!pedal)
+        {
+            continue;
+        }
+
+        EffectId          id = pedal->id;
+        Effect_Blueprint *bp = Effect_Registry[id].blueprint;
+
+        allocSize += bp->funcSerialize(NULL, NULL);
+    }
+
+    void *buf       = malloc(allocSize);
+    void *bufIdPtr  = buf;
+    void *bufDatPtr = buf + idSize;
+    *outBufPtr      = buf;
+
+
+    for (int i = 0; i < PEDALBOARD_PEDAL_COUNT; ++i)
+    {
+        Effect_CommonData *pedal = Pedalboard_Pedals[i];
+        if (pedal)
+        {
+            bufIdPtr += IO_Write_EffectId(pedal->id, bufIdPtr);
+
+            Effect_Blueprint *bp = Effect_Registry[pedal->id].blueprint;
+
+            bufDatPtr += bp->funcSerialize(pedal, bufDatPtr);
+        }
+        else
+        {
+            bufIdPtr += IO_Write_EffectId(EFFECT_ID_INVALID, bufIdPtr);
+        }
+    }
+}
+
+void Pedalboard_StateDeserialize(void *inBuf)
+{
+    Pedalboard_ClearAll();
+
+    void *tmp = inBuf;
+    for (int i = 0; i < PEDALBOARD_PEDAL_COUNT; ++i, tmp += sizeof(EffectId))
+    {
+        EffectId id = IO_ReadToVal_EffectId(tmp);
+        if (id == EFFECT_ID_INVALID)
+        {
+            continue;
+        }
+
+        Pedalboard_InsertNew(i, id);
+    }
+
+    for (int i = 0; i < PEDALBOARD_PEDAL_COUNT; ++i)
+    {
+        Effect_CommonData *pedal = Pedalboard_Pedals[i];
+        if (!pedal)
+        {
+            continue;
+        }
+
+        Effect_Blueprint *bp = Effect_Registry[pedal->id].blueprint;
+        tmp += bp->funcDeserialize(pedal, tmp);
+    }
+}
+
+void Pedalboard_SelectNextPreset()
+{
+    Pedalboard_ActivePreset++;
+    if (Pedalboard_ActivePreset >= Pedalboard_Presets + PEDALBOARD_PRESET_COUNT)
+    {
+        Pedalboard_ActivePreset = Pedalboard_Presets;
+    }
+
+    Pedalboard_RefreshPreset();
+}
+
+void Pedalboard_SelectPrevPreset()
+{
+    Pedalboard_ActivePreset--;
+    if (Pedalboard_ActivePreset < Pedalboard_Presets)
+    {
+        Pedalboard_ActivePreset = Pedalboard_Presets + PEDALBOARD_PRESET_COUNT - 1;
+    }
+
+    Pedalboard_RefreshPreset();
+}
+
+void Pedalboard_RefreshPreset()
+{
+    u32 mtx = Pedalboard_ActivePreset->activePedals;
+
+    for (int i = 0; i < PEDALBOARD_PEDAL_COUNT; ++i)
+    {
+        // TODO: pedal ON/OFF
+        bool on = mtx & 1 << i;
     }
 }

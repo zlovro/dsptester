@@ -11,25 +11,25 @@
 #include "ui/ui_control.h"
 #include <fx/algo/fxalgo_xpass.h>
 
+#include "algo/fxalgo_ds.h"
+
 #define EFFECT_DISTORSION_AA_COUNT 2
 #define EFFECT_DISTORSION_HIPASS_COUNT 2
 
 typedef pstruct Effect_Distorsion
 {
-    EFFECT_COMMON_DATA;
+    EFFECT_COMMON_DATA(Effect_Algo_DistorsionInstance);
     POTS_ARRAY(2, potGain, potDistorsion);
 
     UICONTROL_ARRAY(2);
-
-    f32 aaStates[EFFECT_DISTORSION_AA_COUNT][EFFECT_ALGO_AA_TAPCOUNT];
-    Effect_Algo_FIRInstance aaFirs[EFFECT_DISTORSION_AA_COUNT];
-
-    Effect_Algo_HighpassInstance hipass[EFFECT_DISTORSION_HIPASS_COUNT];
 } Effect_Distorsion;
 
 extern void Effect_DistorsionInit(Effect_Distorsion *fx);
 extern void Effect_DistorsionDraw(Effect_Distorsion *fx);
-extern void Effect_DistorsionHandleInput(Effect_Distorsion *fx, u8 inputData);
+extern void Effect_DistorsionHandleInput(Effect_Distorsion *fx);
 extern void Effect_DistorsionProcessAudio(Effect_Distorsion *fx);
+
+extern u32 Effect_DistorsionSerialize(Effect_Distorsion *fxIn, void *bufOut);
+extern u32 Effect_DistorsionDeserialize(Effect_Distorsion *fxOut, void *bufIn);
 
 #endif //EFFECT_DISTORSION_H

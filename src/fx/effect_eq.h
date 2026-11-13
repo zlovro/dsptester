@@ -12,15 +12,16 @@
 #include <fx/algo/fxalgo_eq.h>
 
 typedef pstruct Effect_Eq {
-    EFFECT_COMMON_DATA;
-
-    Effect_Algo_EqInstance algoInstance;
+    EFFECT_COMMON_DATA(Effect_Algo_EqInstance);
 } Effect_Eq;
 
 extern void Effect_EqInit(Effect_Eq *fx);
 extern void Effect_EqDraw(Effect_Eq *fx);
-extern void Effect_EqHandleInput(Effect_Eq *fx, u8 inputData);
+extern void Effect_EqHandleInput(Effect_Eq *fx);
 extern void Effect_EqProcessAudio(Effect_Eq *fx);
+
+extern u32 Effect_EqSerialize(Effect_Eq *fxIn, void *bufOut);
+extern u32 Effect_EqDeserialize(Effect_Eq *fxOut, void *bufIn);
 
 extern void Effect_EqBandUpdate(Effect_Eq* fx, int band, u16 freq, f32 gain, f32 q);
 extern void Effect_EqBandUpdateByFreq(Effect_Eq* fx, u16 searchFreq, f32 gain, f32 q);

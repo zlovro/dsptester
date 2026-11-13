@@ -55,7 +55,7 @@ void Effect_RegisterEffects()
 
             blueprint->funcInit(instance);
 
-            instance += blueprint->fxSizeBytes;
+            instance += blueprint->instanceSize;
         }
     }
 

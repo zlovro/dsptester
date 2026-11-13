@@ -19,6 +19,7 @@ extern "C"
     #include <st7920.h>
     #include <pedalboard.h>
     #include <input.h>
+    #include <ui/screen.h>
 
     #include <fftw3.h>
 }
@@ -39,8 +40,24 @@ void        UpdateLCD(uint8_t *spiFrame, SDL_Texture *texture);
 static void WAVPlay();
 static void PlotFFT(f32 *buf, int n);
 
+#define TEST_IO 0
+
 int main()
 {
+    #if TEST_IO
+
+    DSP_Init();
+    Effect_RegisterEffects();
+    Pedalboard_Init();
+
+    void* serialized;
+    Pedalboard_StateSerialize(&serialized);
+
+    Pedalboard_StateDeserialize(serialized);
+
+    return 0;
+    #endif
+
     #if TEST_TRANSFER_FUNC
 
     DSP_WorkBuf[0] = 1;
@@ -97,17 +114,14 @@ int main()
 
         ST7920_ClearBack();
         ST7920_DrawRectangleOutline(0, 0, LCD_WIDTH, LCD_HEIGHT, ST7920_ORIGIN_X);
-
         ST7920_DrawRectangleOutline(0, 0, LCD_WIDTH, UI_MARGIN_HEADER_Y, UI_GENERIC_MARGIN);
 
-        ST7920_DrawStringAtPos("Efekt 1", ST7920_ORIGIN_X + UI_GENERIC_MARGIN, UI_PRESET_TEXT_Y_POS);
+        ST7920_DrawStringAtPos(Pedalboard_ActivePreset->name, ST7920_ORIGIN_X + UI_GENERIC_MARGIN, UI_PRESET_TEXT_Y_POS);
 
-        // DrawString and DrawChar instead of DrawStringxxxx, we want to continue the "Preset" string to avoid a sprintf call
+        char presetIdxStr[4];
+        sprintf(presetIdxStr, "%02d", 1 + Pedalboard_ActivePreset - Pedalboard_Presets);
 
-        char pageInfo[8];
-        sprintf(pageInfo, "%02d", time(NULL) % 60);
-
-        ST7920_DrawStringAtPosRightJustified(pageInfo, LCD_WIDTH - ST7920_ORIGIN_X - UI_GENERIC_MARGIN, UI_PRESET_TEXT_Y_POS);
+        ST7920_DrawStringAtPosRightJustified(presetIdxStr, LCD_WIDTH - ST7920_ORIGIN_X - UI_GENERIC_MARGIN, UI_PRESET_TEXT_Y_POS);
 
         ST7920_DottedOffset = frameCounter / 4;
         Pedalboard_Draw();
@@ -119,6 +133,7 @@ int main()
 
         // input code
         InputData_Instance.rotaryDir = INPUT_DIR_NULL;
+        InputData_Instance.btnNxt = InputData_Instance.btnPrev = InputData_Instance.btnAux = INPUT_BTN_NULL;
 
         switch (ev.type)
         {
@@ -135,12 +150,20 @@ int main()
 
                 if (key == SDLK_LEFT)
                 {
-                    InputData_Instance.rotaryDir = INPUT_DIR_L;
+                    InputData_Instance.btnPrev = INPUT_BTN_DOWN;
                 }
                 else if (key == SDLK_RIGHT)
                 {
-                    InputData_Instance.rotaryDir = INPUT_DIR_R;
+                    InputData_Instance.btnNxt = INPUT_BTN_DOWN;
                 }
+
+                break;
+            }
+
+            case SDL_EVENT_MOUSE_WHEEL:
+            {
+                InputData_Instance.rotaryDir = ev.wheel.integer_y > 0 ? INPUT_DIR_R : INPUT_DIR_L;
+                break;
             }
 
             default:

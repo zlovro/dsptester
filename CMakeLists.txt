@@ -49,6 +49,12 @@ add_executable(dsptester WIN32
         src/fx/algo/fxalgo_volume.h
         src/input.c
         src/input.h
+        src/ui/screen.c
+        src/ui/screen.h
+        src/fx/algo/fxalgo_ds.c
+        src/fx/algo/fxalgo_ds.h
+        src/iohelper.c
+        src/iohelper.h
 )
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)

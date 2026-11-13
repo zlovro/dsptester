@@ -12,18 +12,19 @@
 
 typedef pstruct Effect_NoiseGate
 {
-    EFFECT_COMMON_DATA;
+    EFFECT_COMMON_DATA(Effect_Algo_NoiseGateInstance);
 
     POTS_ARRAY(2, potGain, potDistorsion);
 
     UICONTROL_ARRAY(2);
-
-    Effect_Algo_NoiseGateInstance algoInstance;
 } Effect_NoiseGate;
 
 extern void Effect_NoiseGateInit(Effect_NoiseGate *fx);
 extern void Effect_NoiseGateDraw(Effect_NoiseGate *fx);
-extern void Effect_NoiseGateHandleInput(Effect_NoiseGate *fx, u8 inputData);
+extern void Effect_NoiseGateHandleInput(Effect_NoiseGate *fx);
 extern void Effect_NoiseGateProcessAudio(Effect_NoiseGate *fx);
+
+extern u32 Effect_NoiseGateSerialize(Effect_NoiseGate *fxIn, void *bufOut);
+extern u32 Effect_NoiseGateDeserialize(Effect_NoiseGate *fxOut, void *bufIn);
 
 #endif //EFFECT_NOISEGATE_H

@@ -341,7 +341,6 @@ void ST7920_InvertRegion(int x0, int y0, int x1, int y1)
         int x1idx = x1 >> 3;
         int x0idx = x0 >> 3;
         int x0rem = x0 & 7;
-        int x1rem = x1 & 7;
 
         int idx = y * 16 + x0idx;
 
@@ -349,6 +348,8 @@ void ST7920_InvertRegion(int x0, int y0, int x1, int y1)
 
         if (remaining < 8)
         {
+            int x1rem = x1 & 7;
+
             // if the line is less than 1 cell long and spans one cell
             if (x0idx == x1idx)
             {
@@ -373,19 +374,20 @@ void ST7920_InvertRegion(int x0, int y0, int x1, int y1)
         {
             u8 mask = 0xFF >> x0rem;
             ST7920_BackBuf[idx++] ^= mask;
-            remaining -= x0rem;
+            remaining -= 8 - x0rem;
         }
 
         // whole lines
-        for (int i = 0; remaining >= 8; ++i, idx++, remaining -= 8)
+        for (int i = 0; remaining >= 8; ++i, idx++)
         {
             ST7920_BackBuf[idx] ^= 0xFF;
+            remaining -= 8;
         }
 
         // right side remainder
-        if (x1rem)
+        if (remaining)
         {
-            u8 mask = 0xFF << (8 - x1rem);
+            u8 mask = 0xFF << (8 - remaining);
 
             ST7920_BackBuf[idx] ^= mask;
         }
@@ -587,8 +589,8 @@ void ST7920_DrawRectangleOutlineEx(u8 x, u8 y, u8 width, u8 height, u8 thickness
             ST7920_DrawLineVertical(rightSideX, vStart, vLen);
 
             int offset = -ST7920_DottedOffset;
-            int k = offset;
-            int mod = 4;
+            int k      = offset;
+            int mod    = 4;
 
             for (int j = vStart; j != vStart + vLen; j++, k++)
             {

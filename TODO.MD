@@ -5,6 +5,22 @@
   - ~~EQ~~
   - pitch shifter
 
+- UI:
+  - DS UI
+  - EQ UI
+  - Noisegate UI
+  - any fx UI
+  - ~~Fix InvertRegion~~
+  - Pedal selection and modification
+
+- Pedalboard:
+  - preset saving/loading:
+    - ~~IO~~
+    - flash writing
+  - presets in general:
+    - almost done
+  - add ON/OFF rectangle to every pedal
+
 - abbrev.:
   - EQ - EQ
   - compressor - CMP
@@ -17,16 +33,3 @@
   - flanger - FLA
   - reverb - RVB
   - delay - DLY
-
-- UI:
-  - DS UI
-  - EQ UI
-  - Noisegate UI
-  - any fx UI
-  - Fix InvertRegion
-  - Pedal selection and modification
-
-- Pedalboard:
-  - preset saving/loading
-  - presets in general
-  - add ON/OFF rectangle to every pedal
