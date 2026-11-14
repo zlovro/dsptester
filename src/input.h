@@ -63,6 +63,6 @@ typedef struct InputData_Raw
 extern InputData InputData_Data;
 
 // converts values from InputData_DataRaw to InputData_Data
-extern void Input_Handle(InputData_Raw* inputRawIn);
+extern void Input_Handle(InputData_Raw inputRawIn);
 
 #endif //INPUT_H

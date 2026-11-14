@@ -9,13 +9,13 @@
 #include "wavstreamer.hpp"
 #include "main.hpp"
 
-
 namespace plt = matplotlibcpp;
 
 extern "C"
 {
     #include <dsp.h>
     #include <gfx/gfx.h>
+    #include <gfx/ui_common.h>
     #include <gfx/st7920.h>
     #include <pedalboard.h>
     #include <input.h>
@@ -99,6 +99,16 @@ int main()
     Effect_RegisterEffects();
     Pedalboard_Init();
 
+    #define TEST_EQ 1
+
+    #if TEST_EQ
+    Pedalboard_ClearSlot(0);
+    Pedalboard_InsertNew(0, EFFECT_ID_EQ);
+
+    Pedalboard_SelectedPedalIndex = 0;
+    UI_CurrentScreenId            = UI_SCR_PEDAL_EDIT;
+    #endif
+
     const bool *keymap = SDL_GetKeyboardState(NULL);
 
     while (run)
@@ -113,6 +123,8 @@ int main()
 
         // input code
         InputData_Data.rotaryDir = INPUT_DIR_NULL;
+
+        InputData_Raw rawInput = {};
 
         switch (ev.type)
         {
@@ -129,19 +141,35 @@ int main()
                 break;
             }
 
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            {
+                if (ev.button.button == SDL_BUTTON_MIDDLE)
+                {
+                    rawInput.rotaryBtn = true;
+                }
+                break;
+            }
+
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+            {
+                if (ev.button.button == SDL_BUTTON_MIDDLE)
+                {
+                    rawInput.rotaryBtn = false;
+                }
+                break;
+            }
+
             default:
             {
                 break;
             }
         }
 
-        InputData_Raw rawInput = {};
-
         rawInput.btnAux  = keymap[SDL_SCANCODE_SPACE];
         rawInput.btnNxt  = keymap[SDL_SCANCODE_RIGHT];
         rawInput.btnPrev = keymap[SDL_SCANCODE_LEFT];
 
-        Input_Handle(&rawInput);
+        Input_Handle(rawInput);
 
         // rendering code.
         SDL_RenderClear(renderer);

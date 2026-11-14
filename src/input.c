@@ -8,21 +8,20 @@
 #include "pedalboard.h"
 #include "gfx/ui_common.h"
 
-InputData            InputData_Data                                  = {};
-static InputData_Raw InputData_DataRawCurrent, InputData_DataRawPrev = {};
+InputData            InputData_Data        = {};
+static InputData_Raw InputData_DataRawPrev = {};
 
 // (curr, prev) --> Input_ButtonState
 #define INPUT_MERGE_BTN_STATE(curr, prev) ((Input_ButtonState)((curr) << 1) | (prev))
 
-void Input_Handle(InputData_Raw *inputRawIn)
+void Input_Handle(InputData_Raw inputRawIn)
 {
-    InputData_Raw curr = InputData_DataRawCurrent;
     InputData_Raw prev = InputData_DataRawPrev;
 
-    InputData_Data.btnAux    = INPUT_MERGE_BTN_STATE(curr.btnAux, prev.btnAux);
-    InputData_Data.btnNxt    = INPUT_MERGE_BTN_STATE(curr.btnNxt, prev.btnNxt);
-    InputData_Data.btnPrev   = INPUT_MERGE_BTN_STATE(curr.btnPrev, prev.btnPrev);
-    InputData_Data.rotaryBtn = INPUT_MERGE_BTN_STATE(curr.rotaryBtn, prev.rotaryBtn);
+    InputData_Data.btnAux    = INPUT_MERGE_BTN_STATE(inputRawIn.btnAux, prev.btnAux);
+    InputData_Data.btnNxt    = INPUT_MERGE_BTN_STATE(inputRawIn.btnNxt, prev.btnNxt);
+    InputData_Data.btnPrev   = INPUT_MERGE_BTN_STATE(inputRawIn.btnPrev, prev.btnPrev);
+    InputData_Data.rotaryBtn = INPUT_MERGE_BTN_STATE(inputRawIn.rotaryBtn, prev.rotaryBtn);
 
     #if IS_EMU == 0
 
@@ -65,7 +64,7 @@ void Input_Handle(InputData_Raw *inputRawIn)
     #else
     #endif
 
-    InputData_DataRawPrev = InputData_DataRawCurrent;
+    InputData_DataRawPrev = inputRawIn;
 
     switch (UI_CurrentScreenId)
     {
@@ -76,6 +75,11 @@ void Input_Handle(InputData_Raw *inputRawIn)
         }
         case UI_SCR_PEDAL_EDIT:
         {
+            // this will never be null, the active pedal must be non-NULL in order to go from UI_SCR_PEDALBOARD --> UI_SCR_PEDAL_EDIT
+            Effect_CommonData *pedal = Pedalboard_Pedals[Pedalboard_SelectedPedalIndex];
+            Effect_Blueprint * bp    = Effect_Registry[pedal->id].blueprint;
+
+            bp->funcDraw(pedal);
             break;
         }
         case UI_SCR_OPTIONS:

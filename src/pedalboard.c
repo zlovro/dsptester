@@ -227,6 +227,17 @@ void Pedalboard_HandleInput()
     {
         Pedalboard_SelectPrevPreset();
     }
+
+    if (in.rotaryBtn == INPUT_BTN_DOWN)
+    {
+        // edit selected pedal
+        Effect_CommonData *pedal = Pedalboard_Pedals[Pedalboard_SelectedPedalIndex];
+
+        if (pedal)
+        {
+            UI_CurrentScreenId = UI_SCR_PEDAL_EDIT;
+        }
+    }
 }
 
 void Pedalboard_StateSerialize(void **outBufPtr)
