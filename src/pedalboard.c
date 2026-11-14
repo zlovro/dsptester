@@ -11,10 +11,10 @@
 
 #include "input.h"
 #include "iohelper.h"
-#include "st7920.h"
-#include "fx/effect_distorsion.h"
-#include "fx/effect_noisegate.h"
-#include "ui/ui_common.h"
+#include "gfx/st7920.h"
+#include "audiofx/effect_distorsion.h"
+#include "audiofx/effect_noisegate.h"
+#include "gfx/ui_common.h"
 
 Pedalboard_Preset  Pedalboard_Presets[PEDALBOARD_PRESET_COUNT] = {};
 Effect_CommonData *Pedalboard_Pedals[PEDALBOARD_PEDAL_COUNT]   = {};
@@ -208,7 +208,7 @@ void Pedalboard_SelectPrevPedal()
 
 void Pedalboard_HandleInput()
 {
-    InputData in = InputData_Instance;
+    InputData in = InputData_Data;
 
     if (in.rotaryDir == INPUT_DIR_L)
     {

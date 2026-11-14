@@ -12,49 +12,50 @@ add_subdirectory(external/SDL EXCLUDE_FROM_ALL)
 # Create your game executable target as usual
 add_executable(dsptester WIN32
         src/main.cpp
-        src/st7920.c
+        src/gfx/st7920.c
         src/types.h
-        src/ui/ui_control.c
-        src/ui/ui_control.h
-        src/fx/effect.c
-        src/fx/effect.h
-        src/fx/effect_distorsion.c
-        src/fx/effect_distorsion.h
-        src/fx/effect_eq.c
-        src/fx/effect_eq.h
+        src/gfx/ui_control.c
+        src/gfx/ui_control.h
+        src/audiofx/effect.c
+        src/audiofx/effect.h
+        src/audiofx/effect_distorsion.c
+        src/audiofx/effect_distorsion.h
+        src/audiofx/effect_eq.c
+        src/audiofx/effect_eq.h
         src/wavstreamer.cpp
         src/wavstreamer.hpp
         src/dsp.c
         src/dsp.h
-        src/ui/ui_common.h
-        src/fx/algo/fxalgo_xpass.c
-        src/fx/algo/fxalgo_xpass.h
-        src/fx/algo/fxalgo_fir.c
-        src/fx/algo/fxalgo_fir.h
-        src/fx/algo/fxalgo_eq.c
-        src/fx/algo/fxalgo_eq.h
+        src/gfx/ui_common.h
+        src/audiofx/algo/fxalgo_xpass.c
+        src/audiofx/algo/fxalgo_xpass.h
+        src/audiofx/algo/fxalgo_fir.c
+        src/audiofx/algo/fxalgo_fir.h
+        src/audiofx/algo/fxalgo_eq.c
+        src/audiofx/algo/fxalgo_eq.h
         src/pedalboard.c
         src/pedalboard.h
-        src/fx/effect_noisegate.c
-        src/fx/effect_noisegate.h
-        src/fx/effect_volume.c
-        src/fx/effect_volume.h
-        src/fx/effect_chorus.c
-        src/fx/effect_chorus.h
-        src/fx/effect_delay.c
-        src/fx/effect_delay.h
-        src/fx/algo/fxalgo_noisegate.c
-        src/fx/algo/fxalgo_noisegate.h
-        src/fx/algo/fxalgo_volume.c
-        src/fx/algo/fxalgo_volume.h
+        src/audiofx/effect_noisegate.c
+        src/audiofx/effect_noisegate.h
+        src/audiofx/effect_volume.c
+        src/audiofx/effect_volume.h
+        src/audiofx/effect_chorus.c
+        src/audiofx/effect_chorus.h
+        src/audiofx/effect_delay.c
+        src/audiofx/effect_delay.h
+        src/audiofx/algo/fxalgo_noisegate.c
+        src/audiofx/algo/fxalgo_noisegate.h
+        src/audiofx/algo/fxalgo_volume.c
+        src/audiofx/algo/fxalgo_volume.h
         src/input.c
         src/input.h
-        src/ui/screen.c
-        src/ui/screen.h
-        src/fx/algo/fxalgo_ds.c
-        src/fx/algo/fxalgo_ds.h
+        src/audiofx/algo/fxalgo_ds.c
+        src/audiofx/algo/fxalgo_ds.h
         src/iohelper.c
         src/iohelper.h
+        src/gfx/gfx.c
+        src/gfx/gfx.h
+        src/gfx/ui_common.c
 )
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)

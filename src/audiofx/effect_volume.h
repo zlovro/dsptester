@@ -7,8 +7,8 @@
 #define EFFECT_VOLUME_H
 
 #include <types.h>
-#include <fx/effect.h>
-#include <fx/algo/fxalgo_volume.h>
+#include <audiofx/effect.h>
+#include <audiofx/algo/fxalgo_volume.h>
 
 typedef pstruct Effect_Volume
 {

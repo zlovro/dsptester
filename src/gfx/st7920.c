@@ -5,12 +5,10 @@
 
 #include "st7920.h"
 
-#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <time.h>
 
 u8 ST7920_FrontBuf[64 * (7 + 32)] = {0};
 u8 ST7920_BackBuf[1024]           = {0};

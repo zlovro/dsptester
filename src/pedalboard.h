@@ -6,7 +6,7 @@
 #ifndef PEDALBOARD_H
 #define PEDALBOARD_H
 
-#include <fx/effect.h>
+#include <audiofx/effect.h>
 #include <assert.h>
 
 #define PEDALBOARD_PEDAL_COUNT 6

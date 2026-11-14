@@ -8,8 +8,8 @@
 
 #include "types.h"
 #include "effect.h"
-#include "ui/ui_control.h"
-#include <fx/algo/fxalgo_xpass.h>
+#include "gfx/ui_control.h"
+#include <audiofx/algo/fxalgo_xpass.h>
 
 #include "algo/fxalgo_ds.h"
 

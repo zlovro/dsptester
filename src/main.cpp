@@ -15,11 +15,10 @@ namespace plt = matplotlibcpp;
 extern "C"
 {
     #include <dsp.h>
-    #include <ui/ui_common.h>
-    #include <st7920.h>
+    #include <gfx/gfx.h>
+    #include <gfx/st7920.h>
     #include <pedalboard.h>
     #include <input.h>
-    #include <ui/screen.h>
 
     #include <fftw3.h>
 }
@@ -36,9 +35,9 @@ const bool DSP_WavTest = true;
 
 static std::thread wavThread;
 
-void        UpdateLCD(uint8_t *spiFrame, SDL_Texture *texture);
-static void WAVPlay();
-static void PlotFFT(f32 *buf, int n);
+void        EMU_UpdateLCD(uint8_t *spiFrame, SDL_Texture *texture);
+static void EMU_WAVPlay();
+static void EMU_PlotFFT(f32 *buf, int n);
 
 #define TEST_IO 0
 
@@ -71,7 +70,7 @@ int main()
 
     Effect_EqProcessAudio(eq);
 
-    PlotFFT(DSP_WorkBuf, DSP_CHUNK_SIZE);
+    EMU_PlotFFT(DSP_WorkBuf, DSP_CHUNK_SIZE);
 
     plt::show();
 
@@ -95,12 +94,12 @@ int main()
 
     ST7920_Init();
     DSP_Init();
-    WAVPlay();
+    EMU_WAVPlay();
 
     Effect_RegisterEffects();
     Pedalboard_Init();
 
-    long frameCounter = 0;
+    const bool *keymap = SDL_GetKeyboardState(NULL);
 
     while (run)
     {
@@ -108,32 +107,12 @@ int main()
 
         SDL_PollEvent(&ev);
 
-        // LCD code
+        GFX_Draw();
 
-        ST7920_Seek(ST7920_ORIGIN_X, ST7920_ORIGIN_Y);
-
-        ST7920_ClearBack();
-        ST7920_DrawRectangleOutline(0, 0, LCD_WIDTH, LCD_HEIGHT, ST7920_ORIGIN_X);
-        ST7920_DrawRectangleOutline(0, 0, LCD_WIDTH, UI_MARGIN_HEADER_Y, UI_GENERIC_MARGIN);
-
-        ST7920_DrawStringAtPos(Pedalboard_ActivePreset->name, ST7920_ORIGIN_X + UI_GENERIC_MARGIN, UI_PRESET_TEXT_Y_POS);
-
-        char presetIdxStr[4];
-        sprintf(presetIdxStr, "%02d", 1 + Pedalboard_ActivePreset - Pedalboard_Presets);
-
-        ST7920_DrawStringAtPosRightJustified(presetIdxStr, LCD_WIDTH - ST7920_ORIGIN_X - UI_GENERIC_MARGIN, UI_PRESET_TEXT_Y_POS);
-
-        ST7920_DottedOffset = frameCounter / 4;
-        Pedalboard_Draw();
-
-    l_updateLcd:
-
-        ST7920_BackToFront();
-        UpdateLCD(ST7920_FrontBuf, screenTexture);
+        EMU_UpdateLCD(ST7920_FrontBuf, screenTexture);
 
         // input code
-        InputData_Instance.rotaryDir = INPUT_DIR_NULL;
-        InputData_Instance.btnNxt = InputData_Instance.btnPrev = InputData_Instance.btnAux = INPUT_BTN_NULL;
+        InputData_Data.rotaryDir = INPUT_DIR_NULL;
 
         switch (ev.type)
         {
@@ -144,25 +123,9 @@ int main()
                 break;
             }
 
-            case SDL_EVENT_KEY_DOWN:
-            {
-                SDL_Keycode key = ev.key.key;
-
-                if (key == SDLK_LEFT)
-                {
-                    InputData_Instance.btnPrev = INPUT_BTN_DOWN;
-                }
-                else if (key == SDLK_RIGHT)
-                {
-                    InputData_Instance.btnNxt = INPUT_BTN_DOWN;
-                }
-
-                break;
-            }
-
             case SDL_EVENT_MOUSE_WHEEL:
             {
-                InputData_Instance.rotaryDir = ev.wheel.integer_y > 0 ? INPUT_DIR_R : INPUT_DIR_L;
+                InputData_Data.rotaryDir = ev.wheel.integer_y > 0 ? INPUT_DIR_R : INPUT_DIR_L;
                 break;
             }
 
@@ -172,7 +135,13 @@ int main()
             }
         }
 
-        Pedalboard_HandleInput();
+        InputData_Raw rawInput = {};
+
+        rawInput.btnAux  = keymap[SDL_SCANCODE_SPACE];
+        rawInput.btnNxt  = keymap[SDL_SCANCODE_RIGHT];
+        rawInput.btnPrev = keymap[SDL_SCANCODE_LEFT];
+
+        Input_Handle(&rawInput);
 
         // rendering code.
         SDL_RenderClear(renderer);
@@ -190,8 +159,6 @@ int main()
 
             SDL_DelayNS(1'000 * 100);
         }
-
-        frameCounter++;
     }
 
     wavThread.join();
@@ -207,7 +174,7 @@ int main()
 }
 
 
-void UpdateLCD(uint8_t *spiFrame, SDL_Texture *texture)
+void EMU_UpdateLCD(uint8_t *spiFrame, SDL_Texture *texture)
 {
     u32 *texBuf;
     int  pitch;
@@ -255,7 +222,7 @@ void UpdateLCD(uint8_t *spiFrame, SDL_Texture *texture)
     SDL_UnlockTexture(texture);
 }
 
-static void WAVPlay()
+static void EMU_WAVPlay()
 {
     if (wavThread.joinable())
     {
@@ -265,7 +232,7 @@ static void WAVPlay()
 }
 
 
-static void PlotFFT(f32 *buf, int n)
+static void EMU_PlotFFT(f32 *buf, int n)
 {
     fftwf_complex *signal = fftwf_alloc_complex(n);
     fftwf_complex *result = fftwf_alloc_complex(n);

@@ -7,7 +7,7 @@
 
 #include <math.h>
 
-#include "fx/effect_distorsion.h"
+#include "audiofx/effect_distorsion.h"
 
 f32 DSP_WorkBuf[DSP_CHUNK_SIZE] = {};
 

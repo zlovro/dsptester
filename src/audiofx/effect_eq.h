@@ -9,7 +9,7 @@
 #include "types.h"
 #include "effect.h"
 
-#include <fx/algo/fxalgo_eq.h>
+#include <audiofx/algo/fxalgo_eq.h>
 
 typedef pstruct Effect_Eq {
     EFFECT_COMMON_DATA(Effect_Algo_EqInstance);

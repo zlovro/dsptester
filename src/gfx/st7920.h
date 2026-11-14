@@ -6,7 +6,7 @@
 #ifndef ST7920_H
 #define ST7920_H
 
-#include "types.h"
+#include <types.h>
 
 #define ST7920_MONOSPACE false
 #define ST7920_WIDTH 128

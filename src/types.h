@@ -7,6 +7,7 @@
 #define TYPES_H
 
 #include <stdint.h>
+#include <string.h>
 #include <stdbool.h>
 
 typedef uint8_t  u8;
@@ -60,5 +61,11 @@ typedef const char *cstr;
 #define DB_N60  0.001F
 #define DB_N40  0.01F
 #define DB_N20  0.1F
+
+#ifdef __arm__
+#define IS_EMU 0
+#else
+#define IS_EMU 1
+#endif
 
 #endif //TYPES_H

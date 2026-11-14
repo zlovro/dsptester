@@ -7,7 +7,7 @@
 #define EFFECTS_H
 
 #include <types.h>
-#include <ui/ui_control.h>
+#include <gfx/ui_control.h>
 
 enum EffectId : u16
 {

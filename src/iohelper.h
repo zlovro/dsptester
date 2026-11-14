@@ -7,7 +7,7 @@
 #define IOHELPER_H
 
 #include <types.h>
-#include <fx/effect.h>
+#include <audiofx/effect.h>
 
 #define IO_DefFunc(t) \
     static inline u32 IO_Write_ ## t (t x, void* buf) \
