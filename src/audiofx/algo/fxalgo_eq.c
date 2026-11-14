@@ -6,6 +6,7 @@
 #include "fxalgo_eq.h"
 
 #include <math.h>
+#include <stdio.h>
 
 #include "dsp.h"
 
@@ -80,6 +81,15 @@ void Effect_Algo_EqBandUpdate(Effect_Algo_EqBand *band, u16 freq, f32 gain, f32 
     band->freq = freq;
     band->gain = gain;
     band->q    = q;
+
+    if (freq < 1000)
+    {
+        snprintf(band->freqLabel, sizeof(band->freqLabel), "%d", freq);
+    }
+    else
+    {
+        snprintf(band->freqLabel, sizeof(band->freqLabel), "%dk%d", freq / 1000, freq % 1000);
+    }
 
     Effect_Algo_EqBandRecalculate(band);
 }

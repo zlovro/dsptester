@@ -7,7 +7,8 @@
 
 - UI:
   - DS UI
-  - EQ UI
+  - EQ UI:
+    - hardcode Q factor 
   - Noisegate UI
   - any fx UI
   - ~~Fix InvertRegion~~
@@ -33,3 +34,5 @@
   - flanger - FLA
   - reverb - RVB
   - delay - DLY
+
+- mini (4x4) font

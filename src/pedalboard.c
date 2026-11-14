@@ -73,7 +73,7 @@ void Pedalboard_Draw()
 
     int selectedPedalIdx = Pedalboard_SelectedPedalIndex;
 
-    Effect_CommonData *pedal = Pedalboard_Pedals[0];
+    ST7920_DrawRectangleOutline(0, 0, ST7920_WIDTH, UI_MARGIN_HEADER_Y, UI_GENERIC_MARGIN);
 
     for (int row = 0, i = 0, y = startY; row < PEDALBOARD_ROWS; ++row, y += PEDALBOARD_PEDAL_HEIGHT + indivPedalSpacingY)
     {
@@ -81,7 +81,7 @@ void Pedalboard_Draw()
         {
             char *abbrev;
 
-            pedal = Pedalboard_Pedals[i];
+            Effect_CommonData *pedal = Pedalboard_Pedals[i];
             if (pedal)
             {
                 Effect_Blueprint *pedalBlueprint = Effect_Registry[pedal->id].blueprint;

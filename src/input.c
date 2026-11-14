@@ -79,7 +79,7 @@ void Input_Handle(InputData_Raw inputRawIn)
             Effect_CommonData *pedal = Pedalboard_Pedals[Pedalboard_SelectedPedalIndex];
             Effect_Blueprint * bp    = Effect_Registry[pedal->id].blueprint;
 
-            bp->funcDraw(pedal);
+            bp->funcHandleInput(pedal);
             break;
         }
         case UI_SCR_OPTIONS:

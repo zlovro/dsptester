@@ -12,7 +12,7 @@
 
 #include <pedalboard.h>
 
-u32          GFX_FrameCounter    = 0;
+u32 GFX_FrameCounter = 0;
 
 void GFX_Init()
 {
@@ -24,7 +24,6 @@ void GFX_PreDraw()
 
     ST7920_ClearBack();
     ST7920_DrawRectangleOutline(0, 0, ST7920_WIDTH, ST7920_HEIGHT, ST7920_ORIGIN_X);
-    ST7920_DrawRectangleOutline(0, 0, ST7920_WIDTH, UI_MARGIN_HEADER_Y, UI_GENERIC_MARGIN);
 
     ST7920_DottedOffset = GFX_FrameCounter / 4;
 }
@@ -50,6 +49,10 @@ void GFX_Draw()
 
         case UI_SCR_PEDAL_EDIT:
         {
+            Effect_CommonData *pedal = Pedalboard_Pedals[Pedalboard_SelectedPedalIndex];
+            Effect_Blueprint * bp    = Effect_Registry[pedal->id].blueprint;
+
+            bp->funcDraw(pedal);
             break;
         }
         case UI_SCR_OPTIONS:

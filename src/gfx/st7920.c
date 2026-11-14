@@ -436,7 +436,7 @@ void ST7920_DrawCheckerboard(int x0, int y0, int x1, int y1)
         {
             u8 mask = 0xFF >> x0rem;
             ST7920_BackBuf[idx++] |= fill & mask;
-            remaining -= x0rem;
+            remaining -= 8 - x0rem;
         }
 
         // whole lines
@@ -457,46 +457,39 @@ void ST7920_DrawCheckerboard(int x0, int y0, int x1, int y1)
 
 void ST7920_DrawLineHorizontalEx(u8 x, u8 y, u8 length, bool dotted)
 {
-    // ensure the line doesn't go off-screen
-    u8 newLen = length;
-    if (x + newLen > 128)
-    {
-        newLen -= x;
-    }
+    int remaining = length;
 
-    u8 modX = x & 7;
+    int x0rem = x & 7;
+    int idx   = y * 16 + x / 8;
 
-    u16 yIdx        = y * 16;
-    int rowIdxStart = x / 8;
-    if (modX)
+    if (x0rem)
     {
-        u8 leftShift = 8 - modX;
-        ST7920_BackBuf[yIdx + rowIdxStart] |= (1 << leftShift) - 1;
-        if (leftShift > newLen)
+        int count = 8 - x0rem;
+
+        if (count > length)
         {
-            ST7920_BackBuf[yIdx + rowIdxStart] &= ~((1 << (newLen - modX)) - 1);
+            u8 mask = (1 << length) - 1;
+            mask <<= count - length;
+            ST7920_BackBuf[idx] |= mask;
             return;
         }
 
-        if (leftShift == newLen)
-        {
-            return;
-        }
+        // right justified
+        u8 mask = (1 << count) - 1;
+        ST7920_BackBuf[idx++] |= mask;
 
-        newLen -= leftShift;
-        rowIdxStart++;
+        remaining -= count;
     }
 
-    int rowIdx, i;
-    for (i = 0, rowIdx = rowIdxStart; i < newLen / 8; rowIdx++, i++)
+    for (int i = 0; remaining >= 8; ++i, remaining -= 8, idx++)
     {
-        ST7920_BackBuf[yIdx + rowIdx] = 0xFF;
+        ST7920_BackBuf[idx] = 0xFF;
     }
 
-    u8 modLen = newLen & 7;
-    if (modLen)
+    if (remaining > 0)
     {
-        ST7920_BackBuf[yIdx + rowIdx] |= ((1 << modLen) - 1) << (8 - modLen);
+        // left justified
+        ST7920_BackBuf[idx] |= 0xFF << (8 - remaining);
     }
 
     if (dotted)
