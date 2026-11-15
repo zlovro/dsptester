@@ -94,7 +94,7 @@ int main()
 
     ST7920_Init();
     DSP_Init();
-    EMU_WAVPlay();
+    // EMU_WAVPlay();
 
     Effect_RegisterEffects();
     Pedalboard_Init();

@@ -16,10 +16,10 @@ typedef pstruct Effect_Eq
     EFFECT_COMMON_DATA(Effect_Algo_EqInstance);
 } Effect_Eq;
 
-#define EFFECT_EQ_MAX_DB 60
-#define EFFECT_EQ_MIN_DB (-60)
-#define EFFECT_EQ_DELTA_DB 20
-#define EFFECT_EQ_DB_LINE_COUNT (1 + (EFFECT_EQ_MAX_DB - EFFECT_EQ_MIN_DB))
+#define EFFECT_EQ_MAX_DB 20
+#define EFFECT_EQ_MIN_DB (-EFFECT_EQ_MAX_DB)
+#define EFFECT_EQ_DELTA_DB 12
+#define EFFECT_EQ_DB_LINE_COUNT (1 + (EFFECT_EQ_MAX_DB - EFFECT_EQ_MIN_DB) / EFFECT_EQ_DELTA_DB)
 
 extern void Effect_EqInit(Effect_Eq *fx);
 extern void Effect_EqDraw(Effect_Eq *fx);

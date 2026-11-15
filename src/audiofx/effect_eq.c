@@ -15,6 +15,7 @@
 #include <gfx/ui_common.h>
 #include <gfx/st7920.h>
 #include <pedalboard.h>
+#include <stdio.h>
 
 void Effect_EqInit(Effect_Eq *fx)
 {
@@ -37,7 +38,7 @@ void Effect_EqDraw(Effect_Eq *fx)
 
     static_assert(eqBandContainerSpacingX > 0);
 
-    constexpr int eqBandFaderHeight      = 40;
+    constexpr int eqBandFaderHeight      = 41;
     constexpr int eqBandTextStartOffsetY = eqBandFaderHeight;
     constexpr int eqBandTextRectHeight   = eqBandContainerHeight - eqBandTextStartOffsetY;
     constexpr int textRectYTop           = startY + eqBandTextStartOffsetY;
@@ -59,16 +60,26 @@ void Effect_EqDraw(Effect_Eq *fx)
 
         constexpr int faderLineStartY = startY + 2;
         constexpr int faderLineHeight = eqBandFaderHeight - 4;
-        constexpr int faderLineFinalY = faderLineStartY + faderLineHeight - 1;
+        constexpr int faderLineEndY = faderLineStartY + faderLineHeight - 1;
 
-        // ST7920_DrawLineVertical(centerX, faderLineStartY, faderLineHeight);
+        constexpr int faderLineCenterY = faderLineStartY + 1 + faderLineHeight / 2;
 
-        ST7920_DrawLineHorizontal(centerX - 1, faderLineStartY, 2);
-        ST7920_DrawLineHorizontal(centerX - 1, faderLineFinalY, 2);
+        constexpr bool faderLineDotted = false;
+        ST7920_DrawLineVerticalEx(centerX, faderLineStartY, faderLineHeight, faderLineDotted);
 
-        for (int i = 0; i < EFFECT_EQ_DB_LINE_COUNT; ++i)
-        {
-        }
+        constexpr int faderMinorLineLength = 3;
+
+        int faderMinorLineX = centerX - faderMinorLineLength / 2;
+        ST7920_DrawLineHorizontal(faderMinorLineX, faderLineStartY, faderMinorLineLength);
+        ST7920_DrawLineHorizontal(faderMinorLineX, faderLineCenterY, faderMinorLineLength);
+        ST7920_DrawLineHorizontal(faderMinorLineX, faderLineEndY, faderMinorLineLength);
+
+        char small[4];
+        sprintf(small, "%d", EFFECT_EQ_MAX_DB);
+        ST7920_StringToSmallString(small);
+
+        ST7920_DrawStringAtPosRightJustified(small, faderMinorLineX - 2, faderLineStartY);
+        ST7920_DrawStringAtPosRightJustified("\x12\x10", faderMinorLineX - 2, faderLineEndY - 7);
 
         x += eqBandContainerWidth;
     }

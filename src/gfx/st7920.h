@@ -21,6 +21,10 @@
 
 #define ST7920_MAX_GLYPH_WIDTH 8
 
+// only works when d is <= 0x40
+#define ST7920_TO_SMALL_CHAR(d) ((d) - 0x10)
+#define ST7920_FONT_ICON_
+
 typedef pstruct
 {
     u8 drawingStartEnd; // first column that isnt empty
@@ -96,5 +100,13 @@ extern int ST7920_DottedOffset;
 
 void ST7920_Printf(char *format, ...);
 void ST7920_PrintfCenteredInRect(char *format, u8 x, u8 y, u8 width, u8 height, bool vertically, bool horizontally, ...);
+
+static inline void ST7920_StringToSmallString(char* str)
+{
+    while (*str)
+    {
+        *(str++) -= 0x20;
+    }
+}
 
 #endif //ST7920_H

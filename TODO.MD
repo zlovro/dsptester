@@ -6,6 +6,8 @@
   - pitch shifter
 
 - UI:
+  - fix pot system (InitMany etc.):
+    - add common Draw function which draws horizontal pots for regular pedals
   - DS UI
   - EQ UI:
     - hardcode Q factor 

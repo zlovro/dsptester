@@ -10,6 +10,9 @@
 #define EFFECT_ALGO_EQ_F1 6250
 #define EFFECT_ALGO_EQ_BAND_COUNT 4
 
+#define EFFECT_ALGO_EQ_DEFAULT_Q 2.0F
+#define EFFECT_ALGO_EQ_DEFAULT_GAIN DB_0
+
 #include <types.h>
 
 typedef pstruct Effect_Algo_EqBand

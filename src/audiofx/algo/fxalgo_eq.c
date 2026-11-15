@@ -14,10 +14,13 @@ void Effect_Algo_EqInstance_Init(Effect_Algo_EqInstance *instance)
 {
     for (int i = 0; i < EFFECT_ALGO_EQ_BAND_COUNT; ++i)
     {
+        Effect_Algo_EqBand *band = instance->bands + i;
+
+        // log series formula
         f32 freq = EFFECT_ALGO_EQ_F0 * powf(EFFECT_ALGO_EQ_F1 / EFFECT_ALGO_EQ_F0, (f32) i / (f32) (EFFECT_ALGO_EQ_BAND_COUNT - 1));
 
-        Effect_Algo_EqBand *band = instance->bands + i;
-        Effect_Algo_EqBandUpdate(band, freq, 1.0F, M_1SQ2_F);
+        // hardcode Q
+        Effect_Algo_EqBandUpdate(band, freq, EFFECT_ALGO_EQ_DEFAULT_GAIN, EFFECT_ALGO_EQ_DEFAULT_Q);
 
         for (int j = 0; j < 3; ++j)
         {
