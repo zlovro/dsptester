@@ -293,10 +293,17 @@ void ST7920_DrawStringCenteredInRect(char *str, u8 x, u8 y, u8 width, u8 height,
 
 int ST7920_GetGlyphWidth(ST7920_Glyph *g)
 {
+    u8 idx = (u8)(g - ST7920_FontGlyphs);
+
     // last 128 characters are treated as images
-    if (ST7920_MONOSPACE || (g - ST7920_FontGlyphs) >= 128)
+    if (ST7920_MONOSPACE || idx >= 128)
     {
         return 8;
+    }
+
+    if (idx == ' ')
+    {
+        return ST7920_SPACE_WIDTH;
     }
 
     u8 drawingStartEnd = g->drawingStartEnd;

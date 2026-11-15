@@ -99,7 +99,7 @@ int main()
     Effect_RegisterEffects();
     Pedalboard_Init();
 
-    #define TEST_EQ 1
+    #define TEST_EQ 0
 
     #if TEST_EQ
     Pedalboard_ClearSlot(0);

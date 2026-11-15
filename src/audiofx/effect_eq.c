@@ -54,7 +54,7 @@ void Effect_EqDraw(Effect_Eq *fx)
         ST7920_DrawStringCenteredInRect(band.freqLabel, x, textRectYTop, eqBandContainerWidth, eqBandTextRectHeight, true, true);
 
         // fader
-        ST7920_DrawRectangleOutlineDotted1(x, startY, eqBandContainerWidth, eqBandFaderHeight);
+        // ST7920_DrawRectangleOutlineDotted1(x, startY, eqBandContainerWidth, eqBandFaderHeight);
 
         int centerX = x + eqBandContainerWidth / 2;
 
@@ -78,8 +78,14 @@ void Effect_EqDraw(Effect_Eq *fx)
         sprintf(small, "%d", EFFECT_EQ_MAX_DB);
         ST7920_StringToSmallString(small);
 
-        ST7920_DrawStringAtPosRightJustified(small, faderMinorLineX - 2, faderLineStartY);
-        ST7920_DrawStringAtPosRightJustified("\x12\x10", faderMinorLineX - 2, faderLineEndY - 7);
+        ST7920_DrawStringAtPosRightJustified(small, faderMinorLineX - 1, faderLineStartY);
+
+        sprintf(small, "%d", EFFECT_EQ_MIN_DB);
+        ST7920_StringToSmallString(small);
+
+        ST7920_DrawStringAtPosRightJustified(small, faderMinorLineX - 1, faderLineEndY - 7);
+
+        ST7920_DrawStringAtPosRightJustified("\x10", faderMinorLineX - 1, faderLineCenterY - 4);
 
         x += eqBandContainerWidth;
     }

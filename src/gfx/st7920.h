@@ -17,12 +17,11 @@
 
 #define ST7920_LINE_HEIGHT    9
 #define ST7920_FONT_HEIGHT    8
-#define ST7920_FONT_SPACING_X 2
+#define ST7920_FONT_SPACING_X 1
+#define ST7920_SPACE_WIDTH 3
 
 #define ST7920_MAX_GLYPH_WIDTH 8
 
-// only works when d is <= 0x40
-#define ST7920_TO_SMALL_CHAR(d) ((d) - 0x10)
 #define ST7920_FONT_ICON_
 
 typedef pstruct
@@ -96,12 +95,12 @@ void ST7920_InvertRegion(int x0, int y0, int x1, int y1);
 void ST7920_DrawCheckerboard(int x0, int y0, int x1, int y1);
 
 extern bool ST7920_DottedDefaultState;
-extern int ST7920_DottedOffset;
+extern int  ST7920_DottedOffset;
 
 void ST7920_Printf(char *format, ...);
 void ST7920_PrintfCenteredInRect(char *format, u8 x, u8 y, u8 width, u8 height, bool vertically, bool horizontally, ...);
 
-static inline void ST7920_StringToSmallString(char* str)
+static inline void ST7920_StringToSmallString(char *str)
 {
     while (*str)
     {
