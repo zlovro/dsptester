@@ -20,7 +20,9 @@ static InputData_Raw InputData_DataRawPrev = {};
 // (curr, prev) --> Input_ButtonState
 #define INPUT_MERGE_BTN_STATE(curr, prev) ((Input_ButtonState)((curr) << 1) | (prev))
 
-static u32 Input_StartedPressingRotaryBtnTimestamp = 0;
+static u32         Input_ScreenChangeTimestamp       = 0;
+static UI_ScreenId Input_LastScreenId                = UI_SCR_PEDALBOARD;
+static u32         Input_RotaryBtnClickTimestamps[2] = {};
 
 void Input_Handle(InputData_Raw inputRawIn)
 {
@@ -36,6 +38,18 @@ void Input_Handle(InputData_Raw inputRawIn)
     InputData_Data.btnNxt    = INPUT_MERGE_BTN_STATE(inputRawIn.btnNxt, prev.btnNxt);
     InputData_Data.btnPrev   = INPUT_MERGE_BTN_STATE(inputRawIn.btnPrev, prev.btnPrev);
     InputData_Data.rotaryBtn = INPUT_MERGE_BTN_STATE(inputRawIn.rotaryBtn, prev.rotaryBtn);
+
+    if (UI_CurrentScreenId != Input_LastScreenId)
+    {
+        InputData_Data = (InputData){
+            .rotaryDir = INPUT_DIR_NULL
+        };
+        Input_ScreenChangeTimestamp = tick;
+
+        Input_RotaryBtnClickTimestamps[0] = Input_RotaryBtnClickTimestamps[1];
+    }
+
+    Input_LastScreenId = UI_CurrentScreenId;
 
     #if IS_EMU == 0
 
@@ -80,12 +94,8 @@ void Input_Handle(InputData_Raw inputRawIn)
 
     if (InputData_Data.rotaryBtn == INPUT_BTN_DOWN)
     {
-        Input_StartedPressingRotaryBtnTimestamp = tick;
-    }
-
-    if (InputData_Data.rotaryBtn == INPUT_BTN_UP)
-    {
-        Input_StartedPressingRotaryBtnTimestamp = 0;
+        Input_RotaryBtnClickTimestamps[0] = Input_RotaryBtnClickTimestamps[1];
+        Input_RotaryBtnClickTimestamps[1] = tick;
     }
 
     InputData_DataRawPrev = inputRawIn;
@@ -100,10 +110,11 @@ void Input_Handle(InputData_Raw inputRawIn)
         case UI_SCR_PEDAL_EDIT:
         {
             bool pressed   = INPUT_IS_BTN_PRESSED(InputData_Data.rotaryBtn);
-            u32  tickDelta = tick - Input_StartedPressingRotaryBtnTimestamp;
-            if (pressed && tickDelta >= 1000)
+            u32  tickDelta = tick - Input_RotaryBtnClickTimestamps[1];
+            if (tick - Input_ScreenChangeTimestamp >= 500 && pressed && tickDelta >= 500)
             {
                 UI_CurrentScreenId = UI_SCR_PEDALBOARD;
+                break;
             }
 
             // this will never be null, the active pedal must be non-NULL in order to go from UI_SCR_PEDALBOARD --> UI_SCR_PEDAL_EDIT

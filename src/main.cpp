@@ -164,23 +164,23 @@ int main()
                 break;
             }
 
-            case SDL_EVENT_MOUSE_BUTTON_DOWN:
-            {
-                if (ev.button.button == SDL_BUTTON_MIDDLE)
-                {
-                    rawInput.rotaryBtn = true;
-                }
-                break;
-            }
-
-            case SDL_EVENT_MOUSE_BUTTON_UP:
-            {
-                if (ev.button.button == SDL_BUTTON_MIDDLE)
-                {
-                    rawInput.rotaryBtn = false;
-                }
-                break;
-            }
+            // case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            // {
+            //     if (ev.button.button == SDL_BUTTON_MIDDLE)
+            //     {
+            //         rawInput.rotaryBtn = true;
+            //     }
+            //     break;
+            // }
+            //
+            // case SDL_EVENT_MOUSE_BUTTON_UP:
+            // {
+            //     if (ev.button.button == SDL_BUTTON_MIDDLE)
+            //     {
+            //         rawInput.rotaryBtn = false;
+            //     }
+            //     break;
+            // }
 
             default:
             {
@@ -188,9 +188,9 @@ int main()
             }
         }
 
-        rawInput.btnAux  = keymap[SDL_SCANCODE_SPACE];
-        rawInput.btnNxt  = keymap[SDL_SCANCODE_RIGHT];
-        rawInput.btnPrev = keymap[SDL_SCANCODE_LEFT];
+        rawInput.rotaryBtn = keymap[SDL_SCANCODE_SPACE];
+        rawInput.btnNxt    = keymap[SDL_SCANCODE_RIGHT];
+        rawInput.btnPrev   = keymap[SDL_SCANCODE_LEFT];
 
         Input_Handle(rawInput);
 
