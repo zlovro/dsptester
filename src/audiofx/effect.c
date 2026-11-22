@@ -49,9 +49,7 @@ void Effect_RegisterEffects()
             Effect_CommonData *common = instance;
 
             common->id                 = id;
-            common->controlCount       = 0;
-            common->controls           = NULL;
-            common->selectedControlIdx = 0;
+            common->selectedIdx = 0;
 
             blueprint->funcInit(instance);
 
@@ -60,36 +58,4 @@ void Effect_RegisterEffects()
     }
 
     Effect_RegistryDone = true;
-}
-
-void EffectSelectNextControl(Effect_CommonData *fx)
-{
-    u8 idx = fx->selectedControlIdx;
-
-    fx->controls[idx]->isSelected = false;
-
-    idx++;
-    if (idx >= fx->controlCount)
-    {
-        idx = 0;
-    }
-
-    fx->selectedControlIdx        = idx;
-    fx->controls[idx]->isSelected = true;
-}
-
-void EffectSelectPreviousControl(Effect_CommonData *fx)
-{
-    int idx = fx->selectedControlIdx;
-
-    fx->controls[idx]->isSelected = false;
-
-    idx--;
-    if (idx < 0)
-    {
-        idx = fx->controlCount - 1;
-    }
-
-    fx->selectedControlIdx        = idx;
-    fx->controls[idx]->isSelected = true;
 }

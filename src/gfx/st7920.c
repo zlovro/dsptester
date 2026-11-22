@@ -286,7 +286,7 @@ void ST7920_DrawStringLenCenteredInRect(char *str, u8 length, u8 x, u8 y, u8 wid
     ST7920_CursorX = x;
 }
 
-void ST7920_DrawStringCenteredInRect(char *str, u8 x, u8 y, u8 width, u8 height, bool vertically, bool horizontally)
+void ST7920_DrawStringCenteredInRect(char *str, int x, int y, int width, int height, bool vertically, bool horizontally)
 {
     ST7920_DrawStringLenCenteredInRect(str, strlen(str), x, y, width, height, vertically, horizontally);
 }

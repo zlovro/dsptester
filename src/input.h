@@ -33,6 +33,8 @@ typedef enum Input_ButtonState
     INPUT_BTN_HELD = 0b11,
 } Input_ButtonState;
 
+#define INPUT_IS_BTN_PRESSED(i) (i >= INPUT_BTN_DOWN)
+
 #define INPUT_BTN_COUNT 3
 #define INPUT_ALG_PEDAL_DEADZONE 200
 #define INPUT_ROTARY_FLIP 1

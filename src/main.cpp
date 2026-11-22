@@ -13,6 +13,8 @@ namespace plt = matplotlibcpp;
 
 extern "C"
 {
+    #include <emu.h>
+
     #include <dsp.h>
     #include <gfx/gfx.h>
     #include <gfx/ui_common.h>
@@ -76,6 +78,7 @@ int main()
 
     return 0;
     #else
+    #endif
 
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -91,6 +94,8 @@ int main()
 
     auto screenTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR32, SDL_TEXTUREACCESS_STREAMING, LCD_WIDTH, LCD_HEIGHT);
     SDL_SetTextureScaleMode(screenTexture, SDL_SCALEMODE_NEAREST);
+
+    EMU_Init();
 
     ST7920_Init();
     DSP_Init();
@@ -109,7 +114,27 @@ int main()
     UI_CurrentScreenId            = UI_SCR_PEDAL_EDIT;
     #endif
 
+    #define TEST_NGT 1
+    #if TEST_NGT
+    Pedalboard_ClearSlot(0);
+    Pedalboard_InsertNew(0, EFFECT_ID_NOISEGATE);
+
+    Pedalboard_SelectedPedalIndex = 0;
+    UI_CurrentScreenId            = UI_SCR_PEDAL_EDIT;
+    #endif
+
+    #define TEST_DS 0
+    #if TEST_DS
+    Pedalboard_ClearSlot(0);
+    Pedalboard_InsertNew(0, EFFECT_ID_DISTORSION);
+
+    Pedalboard_SelectedPedalIndex = 0;
+    UI_CurrentScreenId            = UI_SCR_PEDAL_EDIT;
+    #endif
+
     const bool *keymap = SDL_GetKeyboardState(NULL);
+
+    InputData_Raw rawInput = {};
 
     while (run)
     {
@@ -123,8 +148,6 @@ int main()
 
         // input code
         InputData_Data.rotaryDir = INPUT_DIR_NULL;
-
-        InputData_Raw rawInput = {};
 
         switch (ev.type)
         {
@@ -187,6 +210,8 @@ int main()
 
             SDL_DelayNS(1'000 * 100);
         }
+
+        fflush(stdout);
     }
 
     wavThread.join();
@@ -198,7 +223,6 @@ int main()
     SDL_Quit();
 
     return 0;
-    #endif
 }
 
 

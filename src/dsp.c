@@ -21,8 +21,8 @@ void DSP_Process()
 
     // Effect_Algo_AA(&fir, DSP_WorkBuf, DSP_CHUNK_SIZE);
 
-    ds->potDistorsion.value = ds->potDistorsion.degreeRange;
-    ds->potGain.value       = 100;
+    ds->potDistorsion.value = 1.0F;
+    ds->potGain.value       = 1.0F;
 
     Effect_DistorsionProcessAudio(ds);
 }

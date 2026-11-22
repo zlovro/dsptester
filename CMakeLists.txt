@@ -58,6 +58,10 @@ add_executable(dsptester WIN32
         src/gfx/ui_common.c
         src/audiofx/algo/fxalgo_mrms.c
         src/audiofx/algo/fxalgo_mrms.h
+        src/gfx/effect_common_ui.c
+        src/gfx/effect_common_ui.h
+        src/emu.c
+        src/emu.h
 )
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)

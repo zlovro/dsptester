@@ -14,9 +14,7 @@ typedef pstruct Effect_NoiseGate
 {
     EFFECT_COMMON_DATA(Effect_Algo_NoiseGateInstance);
 
-    POTS_ARRAY(2, potGain, potDistorsion);
-
-    UICONTROL_ARRAY(2);
+    POTS_ARRAY(1, potThreshold);
 } Effect_NoiseGate;
 
 extern void Effect_NoiseGateInit(Effect_NoiseGate *fx);

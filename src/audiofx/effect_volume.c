@@ -10,16 +10,6 @@
 void Effect_VolumeInit(Effect_Volume *fx)
 {
     Effect_Algo_VolumeInstance_Init(&fx->algoInstance, 1.0F);
-
-    Potentiometer_InitMany(fx->pots, EFFECT_POT_COUNT(fx));
-
-    for (int i = 0; i < EFFECT_POT_COUNT(fx); ++i)
-    {
-        fx->controlPtrs[i] = &fx->pots[i].baseControl;
-    }
-
-    fx->common.controlCount = ARRAY_CNT(fx->controlPtrs);
-    fx->common.controls     = fx->controlPtrs;
 }
 
 void Effect_VolumeDraw(Effect_Volume *fx)

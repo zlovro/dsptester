@@ -29,16 +29,13 @@ typedef void (*FuncEffectHandleInput)(void *);
 typedef void (*FuncEffectProcessAudio)(void *);
 
 // 2 functions: u32 func(void* fxInstance, void* buf) - returns size, if fxInstance is NULL return the size of bytes to write
-typedef u32 (* FuncEffectSerialize)(void *, void *);
+typedef u32 (*FuncEffectSerialize)(void *, void *);
 typedef u32 (*FuncEffectDeserialize)(void *, void *);
 
 typedef struct Effect_CommonData
 {
     EffectId id;
-
-    UIControl **controls;
-    u8          selectedControlIdx;
-    u8          controlCount;
+    u8       selectedIdx;
 } Effect_CommonData;
 
 typedef struct Effect_Blueprint
@@ -79,9 +76,6 @@ typedef struct Effect_Blueprint
 #define EFFECT_GET0(t, id) EFFECT_GET(t, id, 0)
 
 void Effect_RegisterEffects();
-
-void EffectSelectNextControl(Effect_CommonData *fx);
-void EffectSelectPreviousControl(Effect_CommonData *fx);
 
 typedef struct EffectRegistryEntry
 {

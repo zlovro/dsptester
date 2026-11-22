@@ -7,23 +7,18 @@
 
 #include "iohelper.h"
 
+#include <gfx/effect_common_ui.h>
+
 void Effect_NoiseGateInit(Effect_NoiseGate *fx)
 {
-    Effect_Algo_NoiseGateInstance_Init(&fx->algoInstance, DB_N80, TODO, TODO, TODO);
+    Effect_Algo_NoiseGateInstance_Init(&fx->algoInstance, DB_N60, 2, 2, 20);
 
-    Potentiometer_InitMany(fx->pots, EFFECT_POT_COUNT(fx));
-
-    for (int i = 0; i < EFFECT_POT_COUNT(fx); ++i)
-    {
-        fx->controlPtrs[i] = &fx->pots[i].baseControl;
-    }
-
-    fx->common.controlCount = ARRAY_CNT(fx->controlPtrs);
-    fx->common.controls     = fx->controlPtrs;
+    Effect_UI_InitDefaultEditScreen(fx->pots, ARRAY_CNT(fx->pots), "THR");
 }
 
 void Effect_NoiseGateDraw(Effect_NoiseGate *fx)
 {
+    Effect_UI_DrawDefaultEditScreen(fx->pots, ARRAY_CNT(fx->pots));
 }
 
 void Effect_NoiseGateHandleInput(Effect_NoiseGate *fx)

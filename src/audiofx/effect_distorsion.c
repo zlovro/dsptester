@@ -8,20 +8,13 @@
 #include "effect_distorsion.h"
 #include "dsp.h"
 #include "iohelper.h"
+#include <gfx/effect_common_ui.h>
 
 void Effect_DistorsionInit(Effect_Distorsion *fx)
 {
     Effect_Algo_DistorsionInstance_Init(&fx->algoInstance, DB_20, 0.5F, 1.0F);
 
-    Potentiometer_InitMany(fx->pots, EFFECT_POT_COUNT(fx));
-
-    for (int i = 0; i < EFFECT_POT_COUNT(fx); ++i)
-    {
-        fx->controlPtrs[i] = &fx->pots[i].baseControl;
-    }
-
-    fx->common.controlCount = ARRAY_CNT(fx->controlPtrs);
-    fx->common.controls     = fx->controlPtrs;
+    Effect_UI_InitDefaultEditScreen(fx->pots, ARRAY_CNT(fx->pots), "GAIN", "DIST", "VOL");
 
     // for (int i = 0; i < EFFECT_DISTORSION_AA_COUNT; ++i)
     // {
@@ -37,6 +30,7 @@ void Effect_DistorsionInit(Effect_Distorsion *fx)
 
 void Effect_DistorsionDraw(Effect_Distorsion *fx)
 {
+    Effect_UI_DrawDefaultEditScreen(fx->pots, ARRAY_CNT(fx->pots));
 }
 
 void Effect_DistorsionHandleInput(Effect_Distorsion *fx)

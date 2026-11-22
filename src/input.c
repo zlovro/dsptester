@@ -5,8 +5,14 @@
 
 #include "input.h"
 
+#include <stdio.h>
+
 #include "pedalboard.h"
 #include "gfx/ui_common.h"
+
+#if IS_EMU
+#include "emu.h"
+#endif
 
 InputData            InputData_Data        = {};
 static InputData_Raw InputData_DataRawPrev = {};
@@ -14,8 +20,16 @@ static InputData_Raw InputData_DataRawPrev = {};
 // (curr, prev) --> Input_ButtonState
 #define INPUT_MERGE_BTN_STATE(curr, prev) ((Input_ButtonState)((curr) << 1) | (prev))
 
+static u32 Input_StartedPressingRotaryBtnTimestamp = 0;
+
 void Input_Handle(InputData_Raw inputRawIn)
 {
+    u32 tick;
+
+    #if IS_EMU
+    tick = EMU_GetTick();
+    #endif
+
     InputData_Raw prev = InputData_DataRawPrev;
 
     InputData_Data.btnAux    = INPUT_MERGE_BTN_STATE(inputRawIn.btnAux, prev.btnAux);
@@ -64,6 +78,16 @@ void Input_Handle(InputData_Raw inputRawIn)
     #else
     #endif
 
+    if (InputData_Data.rotaryBtn == INPUT_BTN_DOWN)
+    {
+        Input_StartedPressingRotaryBtnTimestamp = tick;
+    }
+
+    if (InputData_Data.rotaryBtn == INPUT_BTN_UP)
+    {
+        Input_StartedPressingRotaryBtnTimestamp = 0;
+    }
+
     InputData_DataRawPrev = inputRawIn;
 
     switch (UI_CurrentScreenId)
@@ -75,6 +99,13 @@ void Input_Handle(InputData_Raw inputRawIn)
         }
         case UI_SCR_PEDAL_EDIT:
         {
+            bool pressed   = INPUT_IS_BTN_PRESSED(InputData_Data.rotaryBtn);
+            u32  tickDelta = tick - Input_StartedPressingRotaryBtnTimestamp;
+            if (pressed && tickDelta >= 1000)
+            {
+                UI_CurrentScreenId = UI_SCR_PEDALBOARD;
+            }
+
             // this will never be null, the active pedal must be non-NULL in order to go from UI_SCR_PEDALBOARD --> UI_SCR_PEDAL_EDIT
             Effect_CommonData *pedal = Pedalboard_Pedals[Pedalboard_SelectedPedalIndex];
             Effect_Blueprint * bp    = Effect_Registry[pedal->id].blueprint;

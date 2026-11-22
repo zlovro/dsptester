@@ -10,71 +10,91 @@
 
 #include "st7920.h"
 
-void Potentiometer_SetText(char *txt)
+void UIControl_Rect_FromCentre(UIControl_Rect *rect, int cx, int cy, int width, int height)
 {
+    int x0 = cx - width / 2;
+    int y0 = cy - height / 2;
+
+    UIControl_Rect_FromTopLeft(rect, x0, y0, width, height);
 }
 
-void Potentiometer_InitMany(Potentiometer *pots, int count)
+void UIControl_Rect_FromTopLeft(UIControl_Rect *rect, int x0, int y0, int width, int height)
 {
-    f32 betweenMargin = (128 - 2 * ST7920_ORIGIN_X - 2 * POTENTIOMETER_SIDE_MARGIN - 2 * count * POTENTIOMETER_RADIUS_F) / (count - 1.0F);
+    rect->x0 = x0;
+    rect->y0 = y0;
+    rect->x1 = x0 + width - 1;
+    rect->y1 = y0 + height - 1;
+}
 
-    f32 xf = ST7920_ORIGIN_X + POTENTIOMETER_SIDE_MARGIN;
-    for (int i = 0; i < count; i++)
+void Potentiometer_Init(Potentiometer *pot, const char *label, int x, int y, bool posIsCentre)
+{
+    pot->label = label;
+
+    Potentiometer_SetPos(pot, x, y, posIsCentre);
+}
+
+void Potentiometer_SetPos(Potentiometer *pot, int x, int y, bool posIsCentre)
+{
+    int wh = max(ST7920_GetStringWidth(pot->label) + 2, POTENTIOMETER_WH);
+
+    pot->width = wh;
+
+    if (posIsCentre)
     {
-        xf += POTENTIOMETER_RADIUS_F;
+        pot->centerX = x;
+        pot->centerY = y;
 
-        Potentiometer *pot = pots + i;
+        UIControl_Rect_FromCentre(&pot->common.rect, x, y, wh, wh);
 
-        pot->centerX     = (int) xf;
-        pot->centerY     = POTENTIOMETER_POS_Y;
-        pot->radius      = POTENTIOMETER_RADIUS_I;
-        pot->degreeRange = POTENTIOMETER_DEGREE_RANGE;
-        pot->value       = 0;
-
-        xf += POTENTIOMETER_RADIUS_F + betweenMargin;
+        pot->common.rect.bottom += POTENTIOMETER_LABEL_Y_PADDING + ST7920_LINE_HEIGHT;
     }
+    else
+    {
+        int height = wh + POTENTIOMETER_LABEL_Y_PADDING + ST7920_LINE_HEIGHT;
+
+        pot->centerX = x + wh / 2;
+        pot->centerY = y + height / 2;
+
+        UIControl_Rect_FromTopLeft(&pot->common.rect, x, y, wh, height);
+    }
+
+    // refresh wiper
+    Potentiometer_SetValue(pot, pot->value);
+}
+
+void Potentiometer_SetValue(Potentiometer *pot, f32 value)
+{
+    constexpr int degRem   = (360 - POTENTIOMETER_DEGREE_RANGE) / 2;
+    constexpr int degLeft  = 270 - degRem;
+    constexpr int degRight = 270 + degRem;
+
+    int degWiper = degLeft - (int) (POTENTIOMETER_DEGREE_RANGE * value);
+
+    f32 radWiper = (f32) degWiper * M_PI_F / 180.0F;
+    int rlim     = degWiper >= 90 ? POTENTIOMETER_RADIUS - 1 : POTENTIOMETER_RADIUS;
+
+    pot->wiperX = pot->centerX + cosf(radWiper) * rlim;
+    pot->wiperY = pot->centerY - sinf(radWiper) * rlim;
+
+    pot->value = value;
 }
 
 void Potentiometer_Draw(Potentiometer *pot)
 {
     int cx = pot->centerX;
     int cy = pot->centerY;
-    int r  = pot->radius;
 
-    ST7920_DrawCircleOutline(cx, cy, r);
+    ST7920_DrawCircleOutline(cx, cy, POTENTIOMETER_RADIUS);
 
-    int degLeft  = 270 - (360 - pot->degreeRange) / 2;
-    int degRight = pot->degreeRange + degLeft;
+    ST7920_DrawLineBresenham(cx, cy, pot->wiperX, pot->wiperY);
 
-    int degWiper = degLeft - ((degRight - degLeft) * pot->value) / 100;
+    UIControl_Rect rect = pot->common.rect;
+    ST7920_DrawStringCenteredInRect(pot->label, rect.x0, cy + POTENTIOMETER_RADIUS + POTENTIOMETER_LABEL_Y_PADDING, 1 + rect.x1 - rect.x0, ST7920_LINE_HEIGHT, true, true);
 
-    f32 radWiper = degWiper * M_PI / 180;
-    int rlim     = degWiper >= 90 ? r - 1 : r;
-
-    int wiperX = cx + cosf(radWiper) * rlim;
-    int wiperY = cy - sinf(radWiper) * rlim;
-
-    ST7920_DrawLineBresenham(cx, cy, wiperX, wiperY);
-
-    char buf[32];
-    sprintf(buf, "%s\n%d", pot->label, pot->value);
-
-    ST7920_DrawStringCenteredInRect(buf, cx - r, cy + r + ST7920_LINE_HEIGHT / 2, 2 * r, 1000, false, true);
-
-    int   linesInLabel = 1;
-    char  c;
-    char *p = buf;
-    while (c = *p++)
+    if (pot->common.isSelected)
     {
-        if (c == '\n')
-        {
-            linesInLabel++;
-        }
-    }
+        UIControl_Rect rect = pot->common.rect;
 
-    if (pot->baseControl.isSelected)
-    {
-        int selectedMargin = 1;
-        ST7920_InvertRegion(cx - r - selectedMargin, cy - r - selectedMargin, cx + r + selectedMargin, cy + r + ST7920_LINE_HEIGHT / 2 + linesInLabel * ST7920_LINE_HEIGHT);
+        ST7920_DrawRectangleOutline1(rect.x0, rect.y0, UIControl_Rect_Width(rect), UIControl_Rect_Height(rect));
     }
 }

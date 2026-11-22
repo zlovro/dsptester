@@ -86,7 +86,7 @@ void ST7920_DrawString(char *str);
 void ST7920_DrawStringAtPos(char *str, int x, int y);
 void ST7920_DrawStringAtPosRightJustified(char *str, int x, int y);
 void ST7920_DrawStringLenCenteredInRect(char *str, u8 length, u8 x, u8 y, u8 width, u8 height, bool vertically, bool horizontally);
-void ST7920_DrawStringCenteredInRect(char *str, u8 x, u8 y, u8 width, u8 height, bool vertically, bool horizontally);
+void ST7920_DrawStringCenteredInRect(char *str, int x, int y, int width, int height, bool vertically, bool horizontally);
 
 inline int ST7920_GetGlyphWidth(ST7920_Glyph *g);
 int        ST7920_GetStringWidth(char *str);

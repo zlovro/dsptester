@@ -19,9 +19,7 @@
 typedef pstruct Effect_Distorsion
 {
     EFFECT_COMMON_DATA(Effect_Algo_DistorsionInstance);
-    POTS_ARRAY(2, potGain, potDistorsion);
-
-    UICONTROL_ARRAY(2);
+    POTS_ARRAY(3, potGain, potDistorsion, potVolume);
 } Effect_Distorsion;
 
 extern void Effect_DistorsionInit(Effect_Distorsion *fx);
