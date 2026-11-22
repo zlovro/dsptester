@@ -10,6 +10,11 @@
 
 #include "dsp.h"
 
+/*
+ * SOURCES:
+ * - https://youtu.be/q_Anc8KyrXI (12. 11. 2026.)
+ */
+
 void Effect_Algo_EqInstance_Init(Effect_Algo_EqInstance *instance)
 {
     for (int i = 0; i < EFFECT_ALGO_EQ_BAND_COUNT; ++i)
