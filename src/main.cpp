@@ -114,7 +114,7 @@ int main()
     UI_CurrentScreenId            = UI_SCR_PEDAL_EDIT;
     #endif
 
-    #define TEST_NGT 1
+    #define TEST_NGT 0
     #if TEST_NGT
     Pedalboard_ClearSlot(0);
     Pedalboard_InsertNew(0, EFFECT_ID_NOISEGATE);
@@ -123,13 +123,18 @@ int main()
     UI_CurrentScreenId            = UI_SCR_PEDAL_EDIT;
     #endif
 
-    #define TEST_DS 0
+    #define TEST_DS 1
     #if TEST_DS
     Pedalboard_ClearSlot(0);
     Pedalboard_InsertNew(0, EFFECT_ID_DISTORSION);
 
     Pedalboard_SelectedPedalIndex = 0;
     UI_CurrentScreenId            = UI_SCR_PEDAL_EDIT;
+    #endif
+
+    #define TEST_EDIT 0
+    #if TEST_EDIT
+    UI_CurrentScreenId = UI_SCR_PEDALBOARD_EDIT;
     #endif
 
     const bool *keymap = SDL_GetKeyboardState(NULL);
@@ -164,24 +169,6 @@ int main()
                 break;
             }
 
-            // case SDL_EVENT_MOUSE_BUTTON_DOWN:
-            // {
-            //     if (ev.button.button == SDL_BUTTON_MIDDLE)
-            //     {
-            //         rawInput.rotaryBtn = true;
-            //     }
-            //     break;
-            // }
-            //
-            // case SDL_EVENT_MOUSE_BUTTON_UP:
-            // {
-            //     if (ev.button.button == SDL_BUTTON_MIDDLE)
-            //     {
-            //         rawInput.rotaryBtn = false;
-            //     }
-            //     break;
-            // }
-
             default:
             {
                 break;
@@ -189,8 +176,9 @@ int main()
         }
 
         rawInput.rotaryBtn = keymap[SDL_SCANCODE_SPACE];
-        rawInput.btnNxt    = keymap[SDL_SCANCODE_RIGHT];
+        rawInput.btnNext   = keymap[SDL_SCANCODE_RIGHT];
         rawInput.btnPrev   = keymap[SDL_SCANCODE_LEFT];
+        rawInput.btnHome   = keymap[SDL_SCANCODE_ESCAPE];
 
         Input_Handle(rawInput);
 

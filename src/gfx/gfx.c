@@ -12,6 +12,8 @@
 
 #include <pedalboard.h>
 
+#include "tuner.h"
+
 u32 GFX_FrameCounter = 0;
 
 void GFX_Init()
@@ -44,6 +46,25 @@ void GFX_Draw()
             ST7920_DrawStringAtPosRightJustified(presetIdxStr, ST7920_WIDTH - ST7920_ORIGIN_X - UI_GENERIC_MARGIN, UI_PRESET_TEXT_Y_POS);
 
             Pedalboard_Draw();
+            break;
+        }
+
+        case UI_SCR_PEDALBOARD_EDIT:
+        {
+            ST7920_DrawStringAtPos("Editing board", ST7920_ORIGIN_X + UI_GENERIC_MARGIN, UI_PRESET_TEXT_Y_POS);
+
+            // char presetIdxStr[4];
+            // sprintf(presetIdxStr, "%02d", (int) (1 + Pedalboard_ActivePreset - Pedalboard_Presets));
+
+            // ST7920_DrawStringAtPosRightJustified(presetIdxStr, ST7920_WIDTH - ST7920_ORIGIN_X - UI_GENERIC_MARGIN, UI_PRESET_TEXT_Y_POS);
+
+            Pedalboard_Draw();
+            break;
+        }
+
+        case UI_SCR_TUNER:
+        {
+            Tuner_Draw();
             break;
         }
 

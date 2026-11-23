@@ -20,9 +20,13 @@ static InputData_Raw InputData_DataRawPrev = {};
 // (curr, prev) --> Input_ButtonState
 #define INPUT_MERGE_BTN_STATE(curr, prev) ((Input_ButtonState)((curr) << 1) | (prev))
 
-static u32         Input_ScreenChangeTimestamp       = 0;
-static UI_ScreenId Input_LastScreenId                = UI_SCR_PEDALBOARD;
-static u32         Input_RotaryBtnClickTimestamps[2] = {};
+static u32         Input_ScreenChangeTimestamp = 0;
+static UI_ScreenId Input_LastScreenId          = UI_SCR_PEDALBOARD;
+
+static struct
+{
+    u32 rotary, next, prev;
+} Input_BtnDownTimestamps = {};
 
 void Input_Handle(InputData_Raw inputRawIn)
 {
@@ -34,8 +38,8 @@ void Input_Handle(InputData_Raw inputRawIn)
 
     InputData_Raw prev = InputData_DataRawPrev;
 
-    InputData_Data.btnAux    = INPUT_MERGE_BTN_STATE(inputRawIn.btnAux, prev.btnAux);
-    InputData_Data.btnNxt    = INPUT_MERGE_BTN_STATE(inputRawIn.btnNxt, prev.btnNxt);
+    InputData_Data.btnHome   = INPUT_MERGE_BTN_STATE(inputRawIn.btnHome, prev.btnHome);
+    InputData_Data.btnNext   = INPUT_MERGE_BTN_STATE(inputRawIn.btnNext, prev.btnNext);
     InputData_Data.btnPrev   = INPUT_MERGE_BTN_STATE(inputRawIn.btnPrev, prev.btnPrev);
     InputData_Data.rotaryBtn = INPUT_MERGE_BTN_STATE(inputRawIn.rotaryBtn, prev.rotaryBtn);
 
@@ -45,8 +49,6 @@ void Input_Handle(InputData_Raw inputRawIn)
             .rotaryDir = INPUT_DIR_NULL
         };
         Input_ScreenChangeTimestamp = tick;
-
-        Input_RotaryBtnClickTimestamps[0] = Input_RotaryBtnClickTimestamps[1];
     }
 
     Input_LastScreenId = UI_CurrentScreenId;
@@ -94,24 +96,85 @@ void Input_Handle(InputData_Raw inputRawIn)
 
     if (InputData_Data.rotaryBtn == INPUT_BTN_DOWN)
     {
-        Input_RotaryBtnClickTimestamps[0] = Input_RotaryBtnClickTimestamps[1];
-        Input_RotaryBtnClickTimestamps[1] = tick;
+        Input_BtnDownTimestamps.rotary = tick;
+    }
+
+    if (InputData_Data.btnNext == INPUT_BTN_DOWN)
+    {
+        Input_BtnDownTimestamps.next = tick;
+    }
+
+    if (InputData_Data.btnPrev == INPUT_BTN_DOWN)
+    {
+        Input_BtnDownTimestamps.prev = tick;
     }
 
     InputData_DataRawPrev = inputRawIn;
+
+    u32 btnNextHeldDuration = tick - Input_BtnDownTimestamps.next;
+    u32 btnPrevHeldDuration = tick - Input_BtnDownTimestamps.prev;
+
+    u32 timeSinceScreenChange = tick - Input_ScreenChangeTimestamp;
+
+    constexpr int PEDALBOARD_EDIT_ACTIVATION_TIME = 1000;
+    constexpr int TUNER_ACTIVATION_TIME           = 300;
+
+    bool heldNextLongEnough = btnNextHeldDuration >= PEDALBOARD_EDIT_ACTIVATION_TIME;
+    bool heldPrevLongEnough = btnPrevHeldDuration >= PEDALBOARD_EDIT_ACTIVATION_TIME;
+    bool heldBtnLongEnough  = heldNextLongEnough && heldPrevLongEnough;
+
+    bool longEnoughInScreen = timeSinceScreenChange >= 500;
+
+    bool canEditPedalboard = timeSinceScreenChange >= 2000 && INPUT_IS_BTN_PRESSED(InputData_Data.btnNext) && INPUT_IS_BTN_PRESSED(InputData_Data.btnPrev) && heldBtnLongEnough;
+    bool canGoToTuner      = longEnoughInScreen && !heldBtnLongEnough &&
+                             ((INPUT_IS_BTN_PRESSED(InputData_Data.btnNext) && InputData_Data.btnPrev == INPUT_BTN_UP) ||
+                              (INPUT_IS_BTN_PRESSED(InputData_Data.btnPrev) && InputData_Data.btnNext == INPUT_BTN_UP));
 
     switch (UI_CurrentScreenId)
     {
         case UI_SCR_PEDALBOARD:
         {
+            if (canEditPedalboard)
+            {
+                UI_CurrentScreenId = UI_SCR_PEDALBOARD_EDIT;
+                break;
+            }
+
+            if (canGoToTuner)
+            {
+                UI_CurrentScreenId = UI_SCR_TUNER;
+                break;
+            }
+
             Pedalboard_HandleInput();
+            break;
+        }
+        case UI_SCR_PEDALBOARD_EDIT:
+        {
+            if (canEditPedalboard)
+            {
+                UI_CurrentScreenId            = UI_SCR_PEDALBOARD;
+                Pedalboard_IgnoreInputCounter = 2;
+                break;
+            }
+
+            Pedalboard_HandleInput();
+            break;
+        }
+        case UI_SCR_TUNER:
+        {
+            if (canGoToTuner)
+            {
+                UI_CurrentScreenId            = UI_SCR_PEDALBOARD;
+                Pedalboard_IgnoreInputCounter = 1;
+                break;
+            }
             break;
         }
         case UI_SCR_PEDAL_EDIT:
         {
-            bool pressed   = INPUT_IS_BTN_PRESSED(InputData_Data.rotaryBtn);
-            u32  tickDelta = tick - Input_RotaryBtnClickTimestamps[1];
-            if (tick - Input_ScreenChangeTimestamp >= 500 && pressed && tickDelta >= 500)
+            bool heldRotaryLongEnough = INPUT_IS_BTN_PRESSED(InputData_Data.rotaryBtn) && tick - Input_BtnDownTimestamps.rotary >= 500;
+            if (timeSinceScreenChange >= 500 && heldRotaryLongEnough)
             {
                 UI_CurrentScreenId = UI_SCR_PEDALBOARD;
                 break;

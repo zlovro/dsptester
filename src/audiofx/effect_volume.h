@@ -14,7 +14,7 @@ typedef pstruct Effect_Volume
 {
     EFFECT_COMMON_DATA(Effect_Algo_VolumeInstance);
 
-    POTS_ARRAY(2, potGain, potDistorsion);
+    POTS_ARRAY(1, potVolume);
 } Effect_Volume;
 
 extern void Effect_VolumeInit(Effect_Volume *fx);

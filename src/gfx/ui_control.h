@@ -40,7 +40,6 @@ typedef struct UIControl_Rect
 typedef struct UIControl_Common
 {
     UIControl_Rect rect;
-    bool           isSelected;
 } UIControl_Common;
 
 typedef struct Potentiometer

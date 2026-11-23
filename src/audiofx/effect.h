@@ -9,12 +9,13 @@
 #include <types.h>
 #include <gfx/ui_control.h>
 
+// ALWAYS sort in alphabetical order!!
 enum EffectId : u16
 {
-    EFFECT_ID_DISTORSION,
-    EFFECT_ID_EQ,
-    EFFECT_ID_NOISEGATE,
-    EFFECT_ID_VOLUME,
+    EFFECT_ID_DISTORSION, // DS
+    EFFECT_ID_EQ,         // EQ
+    EFFECT_ID_NOISEGATE,  // GAT
+    EFFECT_ID_VOLUME,     // VOL
     EFFECT_COUNT,
 
     EFFECT_ID_INVALID = 0xFFFF

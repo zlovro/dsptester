@@ -9,20 +9,23 @@
 
 #include <gfx/effect_common_ui.h>
 
+static Effect_UI_DefaultEditScreen Screen;
+
 void Effect_NoiseGateInit(Effect_NoiseGate *fx)
 {
     Effect_Algo_NoiseGateInstance_Init(&fx->algoInstance, DB_N60, 2, 2, 20);
 
-    Effect_UI_InitDefaultEditScreen(fx->pots, ARRAY_CNT(fx->pots), "THR");
+    Effect_UI_DefaultEditScreen_Init(&Screen, fx->pots, ARRAY_CNT(fx->pots), "THR");
 }
 
 void Effect_NoiseGateDraw(Effect_NoiseGate *fx)
 {
-    Effect_UI_DrawDefaultEditScreen(fx->pots, ARRAY_CNT(fx->pots));
+    Effect_UI_DefaultEditScreen_Draw(&Screen);
 }
 
 void Effect_NoiseGateHandleInput(Effect_NoiseGate *fx)
 {
+    Effect_UI_DefaultEditScreen_HandleInput(&Screen);
 }
 
 

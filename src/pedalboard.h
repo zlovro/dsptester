@@ -19,7 +19,7 @@ static_assert(PEDALBOARD_ROWS * PEDALBOARD_COLS == PEDALBOARD_PEDAL_COUNT);
 #define PEDALBOARD_MARGIN 3
 
 #define PEDALBOARD_PEDAL_PADDING 2
-#define PEDALBOARD_PEDAL_WIDTH (3 * (ST7920_MAX_GLYPH_WIDTH + ST7920_FONT_SPACING_X) + 2 * PEDALBOARD_PEDAL_PADDING)
+#define PEDALBOARD_PEDAL_WIDTH (3 * (ST7920_MAX_GLYPH_WIDTH + ST7920_FONT_SPACING_X) + 2 * (3 + 1)) // 2 * (3 + 1) width for arrow characters
 #define PEDALBOARD_PEDAL_HEIGHT (ST7920_FONT_HEIGHT + 2 * PEDALBOARD_PEDAL_PADDING)
 
 #define PEDALBOARD_PRESET_MAX_NAME_LENGTH 11
@@ -33,16 +33,14 @@ typedef struct Pedalboard_Preset
     u32 activePedals;
 } Pedalboard_Preset;
 
-extern Pedalboard_Preset Pedalboard_Presets[];
-extern Pedalboard_Preset* Pedalboard_ActivePreset;
+extern Pedalboard_Preset  Pedalboard_Presets[];
+extern Pedalboard_Preset *Pedalboard_ActivePreset;
+extern int                Pedalboard_IgnoreInputCounter;
 
 extern Effect_CommonData *Pedalboard_Pedals[];
 #define PEDALBOARD_GET(t, idx) ((t*)(Pedalboard_Pedals[idx]))
 
 extern int Pedalboard_SelectedPedalIndex;
-
-// dynamically allocated
-extern void *Pedalboard_DynamicIOBuf;
 
 // must be ran after
 extern void Pedalboard_Init();

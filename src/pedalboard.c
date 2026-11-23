@@ -21,8 +21,11 @@ Effect_CommonData *Pedalboard_Pedals[PEDALBOARD_PEDAL_COUNT]   = {};
 
 Pedalboard_Preset *Pedalboard_ActivePreset = Pedalboard_Presets + 4;
 
-void *Pedalboard_DynamicIOBuf       = NULL;
-int   Pedalboard_SelectedPedalIndex = 2;
+int Pedalboard_IgnoreInputCounter = 0;
+int Pedalboard_SelectedPedalIndex = 2;
+
+static bool     Pedalboard_ChoosingPedal = false;
+static EffectId Pedalboard_ChoosingTmpId = EFFECT_ID_INVALID;
 
 void Pedalboard_Init()
 {
@@ -75,6 +78,12 @@ void Pedalboard_Draw()
 
     ST7920_DrawRectangleOutline(0, 0, ST7920_WIDTH, UI_MARGIN_HEADER_Y, UI_GENERIC_MARGIN);
 
+    char tmp[16];
+
+    bool     isEditing     = UI_CurrentScreenId == UI_SCR_PEDALBOARD_EDIT;
+    bool     choosingPedal = Pedalboard_ChoosingPedal;
+    EffectId choosingTmpId = Pedalboard_ChoosingTmpId;
+
     for (int row = 0, i = 0, y = startY; row < PEDALBOARD_ROWS; ++row, y += PEDALBOARD_PEDAL_HEIGHT + indivPedalSpacingY)
     {
         for (int col = 0, x = startX; col < PEDALBOARD_COLS; ++col, x += PEDALBOARD_PEDAL_WIDTH + indivPedalSpacingX)
@@ -93,7 +102,25 @@ void Pedalboard_Draw()
                 abbrev = "--";
             }
 
-            ST7920_DrawStringCenteredInRect(abbrev, x, y, PEDALBOARD_PEDAL_WIDTH, PEDALBOARD_PEDAL_HEIGHT, true, true);
+            bool selected = i == selectedPedalIdx;
+
+            char *txtToDraw = abbrev;
+            if (choosingPedal && selected && isEditing)
+            {
+                if (choosingTmpId >= EFFECT_COUNT)
+                {
+                    abbrev = "--";
+                }
+                else
+                {
+                    abbrev = Effect_Registry[choosingTmpId].blueprint->abbrev;
+                }
+
+                sprintf(tmp, "%c%s%c", ST7920_FONT_ICON_ARROW_LEFT, abbrev, ST7920_FONT_ICON_ARROW_RIGHT);
+                txtToDraw = tmp;
+            }
+
+            ST7920_DrawStringCenteredInRect(txtToDraw, x, y, PEDALBOARD_PEDAL_WIDTH, PEDALBOARD_PEDAL_HEIGHT, true, true);
 
             if (col < PEDALBOARD_COLS - 1)
             {
@@ -126,7 +153,6 @@ void Pedalboard_Draw()
                 ST7920_DrawLineBresenham(conn_startX, k - 1, conn_startX + 2, k - 3);
             }
 
-            bool selected = i == selectedPedalIdx;
             if (selected)
             {
                 ST7920_InvertRegion(x, y, x + PEDALBOARD_PEDAL_WIDTH, y + PEDALBOARD_PEDAL_HEIGHT);
@@ -147,6 +173,12 @@ void Pedalboard_InsertExisting(int pos, Effect_CommonData *pedal)
 
 void Pedalboard_InsertNew(int pos, EffectId pedalId)
 {
+    if (pedalId >= EFFECT_COUNT)
+    {
+        Pedalboard_InsertExisting(pos, NULL);
+        return;
+    }
+
     u32 matrix = 0;
 
     Effect_RegistryEntry *entry = Effect_Registry + pedalId;
@@ -208,34 +240,103 @@ void Pedalboard_SelectPrevPedal()
 
 void Pedalboard_HandleInput()
 {
+    bool editingBoard = UI_CurrentScreenId == UI_SCR_PEDALBOARD_EDIT;
+
     InputData in = InputData_Data;
 
     if (in.rotaryDir == INPUT_DIR_L)
     {
-        Pedalboard_SelectPrevPedal();
+        if (Pedalboard_ChoosingPedal && editingBoard)
+        {
+            int id = Pedalboard_ChoosingTmpId;
+            id--;
+
+            if (id == -1)
+            {
+                id = EFFECT_ID_INVALID;
+            }
+            else if (id == EFFECT_ID_INVALID - 1)
+            {
+                id = EFFECT_COUNT - 1;
+            }
+
+            Pedalboard_ChoosingTmpId = id;
+        }
+        else
+        {
+            Pedalboard_SelectPrevPedal();
+        }
     }
     else if (in.rotaryDir == INPUT_DIR_R)
     {
-        Pedalboard_SelectNextPedal();
+        if (Pedalboard_ChoosingPedal && editingBoard)
+        {
+            int id = Pedalboard_ChoosingTmpId;
+            id++;
+
+            if (id == EFFECT_COUNT)
+            {
+                id = EFFECT_ID_INVALID;
+            }
+            else if (id == EFFECT_ID_INVALID)
+            {
+                id = 0;
+            }
+
+            Pedalboard_ChoosingTmpId = id;
+        }
+        else
+        {
+            Pedalboard_SelectNextPedal();
+        }
     }
 
-    if (in.btnNxt == INPUT_BTN_DOWN)
+    if (Pedalboard_IgnoreInputCounter == 0)
     {
-        Pedalboard_SelectNextPreset();
+        if (!INPUT_IS_BTN_PRESSED(in.btnPrev) && in.btnNext == INPUT_BTN_UP)
+        {
+            Pedalboard_SelectNextPreset();
+        }
+        else if (!INPUT_IS_BTN_PRESSED(in.btnNext) && in.btnPrev == INPUT_BTN_UP)
+        {
+            Pedalboard_SelectPrevPreset();
+        }
     }
-    else if (in.btnPrev == INPUT_BTN_DOWN)
+
+    if (Pedalboard_IgnoreInputCounter)
     {
-        Pedalboard_SelectPrevPreset();
+        if (in.btnPrev == INPUT_BTN_UP || in.btnNext == INPUT_BTN_UP)
+        {
+            Pedalboard_IgnoreInputCounter--;
+        }
     }
 
     if (in.rotaryBtn == INPUT_BTN_DOWN)
     {
-        // edit selected pedal
         Effect_CommonData *pedal = Pedalboard_Pedals[Pedalboard_SelectedPedalIndex];
 
-        if (pedal)
+
+        if (editingBoard)
         {
-            UI_CurrentScreenId = UI_SCR_PEDAL_EDIT;
+            if (Pedalboard_ChoosingPedal)
+            {
+                // end of choosing
+                Pedalboard_InsertNew(Pedalboard_SelectedPedalIndex, Pedalboard_ChoosingTmpId);
+            }
+            else
+            {
+                // start of choosing
+                Pedalboard_ChoosingTmpId = pedal ? pedal->id : EFFECT_ID_INVALID;
+            }
+
+            Pedalboard_ChoosingPedal = !Pedalboard_ChoosingPedal;
+        }
+        else
+        {
+            if (pedal)
+            {
+                UI_CurrentScreenId = UI_SCR_PEDAL_EDIT;
+            }
         }
     }
 }

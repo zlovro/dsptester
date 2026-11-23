@@ -10,11 +10,13 @@
 #include "iohelper.h"
 #include <gfx/effect_common_ui.h>
 
+static Effect_UI_DefaultEditScreen Screen;
+
 void Effect_DistorsionInit(Effect_Distorsion *fx)
 {
     Effect_Algo_DistorsionInstance_Init(&fx->algoInstance, DB_20, 0.5F, 1.0F);
 
-    Effect_UI_InitDefaultEditScreen(fx->pots, ARRAY_CNT(fx->pots), "GAIN", "DIST", "VOL");
+    Effect_UI_DefaultEditScreen_Init(&Screen, fx->pots, ARRAY_CNT(fx->pots), "GAIN", "DIST", "VOL");
 
     // for (int i = 0; i < EFFECT_DISTORSION_AA_COUNT; ++i)
     // {
@@ -30,11 +32,12 @@ void Effect_DistorsionInit(Effect_Distorsion *fx)
 
 void Effect_DistorsionDraw(Effect_Distorsion *fx)
 {
-    Effect_UI_DrawDefaultEditScreen(fx->pots, ARRAY_CNT(fx->pots));
+    Effect_UI_DefaultEditScreen_Draw(&Screen);
 }
 
 void Effect_DistorsionHandleInput(Effect_Distorsion *fx)
 {
+    Effect_UI_DefaultEditScreen_HandleInput(&Screen);
 }
 
 void Effect_DistorsionProcessAudio(Effect_Distorsion *fx)

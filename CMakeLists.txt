@@ -62,6 +62,8 @@ add_executable(dsptester WIN32
         src/gfx/effect_common_ui.h
         src/emu.c
         src/emu.h
+        src/tuner.c
+        src/tuner.h
 )
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)

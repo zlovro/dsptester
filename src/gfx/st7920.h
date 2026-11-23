@@ -22,7 +22,8 @@
 
 #define ST7920_MAX_GLYPH_WIDTH 8
 
-#define ST7920_FONT_ICON_
+#define ST7920_FONT_ICON_ARROW_LEFT ((u8)0x01)
+#define ST7920_FONT_ICON_ARROW_RIGHT ((u8)0x02)
 
 typedef pstruct
 {

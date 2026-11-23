@@ -46,16 +46,18 @@ typedef struct InputData
     Input_Direction   rotaryDir: 2;
     Input_ButtonState rotaryBtn: 2;
 
-    Input_ButtonState btnNxt : 2;
-    Input_ButtonState btnPrev: 2;
-    Input_ButtonState btnAux : 2;
+    Input_ButtonState btnHome     : 2;
+    Input_ButtonState btnEditBoard: 2;
+    Input_ButtonState btnNext     : 2;
+    Input_ButtonState btnPrev     : 2;
 } InputData;
 
 typedef struct InputData_Raw
 {
-    bool btnNxt : 1;
-    bool btnPrev: 1;
-    bool btnAux : 1;
+    bool btnHome     : 1;
+    bool btnEditBoard: 1;
+    bool btnNext     : 1;
+    bool btnPrev     : 1;
 
     bool rotaryA  : 1;
     bool rotaryB  : 1;

@@ -6,18 +6,25 @@
 #include "effect_volume.h"
 
 #include "iohelper.h"
+#include <gfx/effect_common_ui.h>
+
+static Effect_UI_DefaultEditScreen Screen;
 
 void Effect_VolumeInit(Effect_Volume *fx)
 {
     Effect_Algo_VolumeInstance_Init(&fx->algoInstance, 1.0F);
+
+    Effect_UI_DefaultEditScreen_Init(&Screen, fx->pots, ARRAY_CNT(fx->pots), "VOL");
 }
 
 void Effect_VolumeDraw(Effect_Volume *fx)
 {
+    Effect_UI_DefaultEditScreen_Draw(&Screen);
 }
 
 void Effect_VolumeHandleInput(Effect_Volume *fx)
 {
+    Effect_UI_DefaultEditScreen_HandleInput(&Screen);
 }
 
 void Effect_VolumeProcessAudio(Effect_Volume *fx)

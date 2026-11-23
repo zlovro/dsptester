@@ -35,7 +35,7 @@ void Potentiometer_Init(Potentiometer *pot, const char *label, int x, int y, boo
 
 void Potentiometer_SetPos(Potentiometer *pot, int x, int y, bool posIsCentre)
 {
-    int wh = max(ST7920_GetStringWidth(pot->label) + 2, POTENTIOMETER_WH);
+    int wh = max(ST7920_GetStringWidth(pot->label), POTENTIOMETER_WH) + 2;
 
     pot->width = wh;
 
@@ -89,12 +89,5 @@ void Potentiometer_Draw(Potentiometer *pot)
     ST7920_DrawLineBresenham(cx, cy, pot->wiperX, pot->wiperY);
 
     UIControl_Rect rect = pot->common.rect;
-    ST7920_DrawStringCenteredInRect(pot->label, rect.x0, cy + POTENTIOMETER_RADIUS + POTENTIOMETER_LABEL_Y_PADDING, 1 + rect.x1 - rect.x0, ST7920_LINE_HEIGHT, true, true);
-
-    if (pot->common.isSelected)
-    {
-        UIControl_Rect rect = pot->common.rect;
-
-        ST7920_DrawRectangleOutline1(rect.x0, rect.y0, UIControl_Rect_Width(rect), UIControl_Rect_Height(rect));
-    }
+    ST7920_DrawStringCenteredInRect(pot->label, rect.x0, cy + POTENTIOMETER_RADIUS + POTENTIOMETER_LABEL_Y_PADDING, UIControl_Rect_Width(rect), ST7920_LINE_HEIGHT, true, true);
 }
